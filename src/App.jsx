@@ -1,4 +1,5 @@
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { DocumentProvider } from './context/DocumentContext';
 import './App.css';
 
 // other imports
@@ -30,14 +31,16 @@ function App() {
           Recipe Document Extraction Agent
         </h1>
         <NavBar links={links} />
-        <main className='main'>
-          <Routes>
-            <Route path='/' element={<Navigate to="/upload" />} />
-            <Route path="/upload" element={<Tab1 />} />
-            <Route path="/validation" element={<Tab2 />} />
-            <Route path="/output" element={<Tab3 />} />
-          </Routes>
-        </main>
+        <DocumentProvider>
+          <main className='main'>
+            <Routes>
+              <Route path='/' element={<Navigate to="/upload" />} />
+              <Route path="/upload" element={<Tab1 />} />
+              <Route path="/validation" element={<Tab2 />} />
+              <Route path="/output" element={<Tab3 />} />
+            </Routes>
+          </main>
+        </DocumentProvider>
       </div>
     </Router>
   );

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
+import { fetchWithBaseUrl } from './../../../api';
 
 import Button from '../../ui/button';
 
@@ -23,12 +24,18 @@ const tableColumns = [
   { key: "manualOverride", header: "Manual Override" },
 ];
 
+
+
 const Status = () => {
   const navigate = useNavigate();
 
-  function navigateToTab3() {
-    navigate("/output");
-  }
+  useEffect(() => {
+    async function fetchData() {
+      const data = await fetchWithBaseUrl("/api/document", { method: "GET" });
+      console.log(data);
+    }
+    fetchData();
+  }, [])
 
   return (
     <section className={styles.main}>
@@ -38,7 +45,7 @@ const Status = () => {
       <div>
         <Table data={documentData} columns={tableColumns} />
       </div>
-      <Button onClick={navigateToTab3} className="full-width">1 Change made, Digitize Recipe?</Button>
+      <Button onClick={() => navigate("/output")} className="full-width">1 Change made, Digitize Recipe?</Button>
     </section>
   )
 }

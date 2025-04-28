@@ -1,9 +1,8 @@
 import React from 'react';
+import { fetchWithBaseUrl } from '../../../api';
 
-import Button from './../../ui/button/index'
-import styles from './style.module.css';
-import ProgressBar from '../../ui/progressBar';
 import Select from '../../ui/select';
+import styles from './style.module.css';
 
 interface Option {
   value: string;
@@ -22,6 +21,11 @@ const previouslyUploadedDocList: Option[] = [
 ]
 
 const Second: React.FC = () => {
+  const handleSelectChange = (e: string) => {
+    console.log('changed', e);
+    // Example: Use _fetchJson to make an API call here
+    fetchWithBaseUrl(`/api/some-endpoint?docId=${e}`, { method: 'GET' }).then((response) => { console.log(response) });
+  };
   return (
     <section className={styles.main}>
       <h4 className={styles.tabTitle}>
@@ -31,7 +35,7 @@ const Second: React.FC = () => {
         <div className='form-element'>
           Selected attribute: <Select
             options={previouslyUploadedDocList}
-            onChange={(e) => { console.log('changed', e) }}
+            onChange={handleSelectChange}
             value='DOC-12345'
           />
         </div>

@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import Button from '../../ui/button/index'
 import styles from './style.module.css';
-import ProgressBar from '../../ui/progressBar';
 
 const Third: React.FC = () => {
+  useEffect(() => {
+  }, [])
   return (
     <section className={styles.main}>
       <h4 className={styles.tabTitle}>

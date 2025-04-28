@@ -1,6 +1,8 @@
 import React from 'react';
-import styles from './style.module.css';
+
+
 import Table from '../../ui/table';
+import styles from './style.module.css';
 
 interface DocumentData1 {
   recipeId: string;
