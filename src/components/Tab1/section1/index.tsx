@@ -1,13 +1,19 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDocument } from '../../../context/DocumentContext';
 
+// APIs
+import { uploadDocument, submitDocument, getPreviousUploads } from './../../../api';
+
+// UI components
 import Button from '../../ui/button';
 import Dropzone from '../../ui/dropzone';
-
 import Table from '../../ui/table';
-
 import Select from '../../ui/select';
+
+// styles
 import styles from './style.module.css';
 
+// interfaces
 interface Option {
   value: string;
   label: string;
@@ -30,7 +36,7 @@ const documentData: DocumentData[] = [
   { slNo: 5, documentId: 'DOC005', documentName: 'Document E', uploadedOn: '2023-10-30', uploadedBy: 'User 5', validated: 'Y' },
 ];
 
-const tableColumns = [ {key: "slNo",header: "Sl No"},{key: "documentId",header: "Document ID"},{key: "documentName",header: "Document name"},{key: "uploadedOn",header: "Uploaded on"},{key: "uploadedBy",header: "Uploaded by"},{key: "validated",header: "Validated (Y/N)"}];
+const tableColumns = [{ key: "slNo", header: "Sl No" }, { key: "documentId", header: "Document ID" }, { key: "documentName", header: "Document name" }, { key: "uploadedOn", header: "Uploaded on" }, { key: "uploadedBy", header: "Uploaded by" }, { key: "validated", header: "Validated (Y/N)" }];
 
 const previouslyUploadedDocList: Option[] = [
   {
@@ -43,9 +49,51 @@ const previouslyUploadedDocList: Option[] = [
   }
 ]
 
+
+
 const Status = () => {
-  const selectionChange = (file) => {
-    console.log(file);
+  const {setDocumentId} = useDocument();
+  const [selectedFile, setSelectedFile] = useState<File | null>();
+  const [previousUploadList, setPreviousUploadList] = useState<Option[]>([]);
+  const [SelectedUploadedFileId, setSelectedUploadedFileId] = useState<string | undefined>(undefined);
+  const [previousUploadsTable, setPreviousUploadsTable] = useState<DocumentData[]>(documentData)
+
+  useEffect(() => {
+    const _init = async () => {
+      // use the fetch API call to get the previous upload list
+      // const docList = await getPreviousUploads();
+      const docList = documentData;
+      setPreviousUploadsTable(docList);
+
+      // extract the list of document IDs from the table list
+      const docIds: Option[] = docList.map((item) => {
+        return {
+          value: item.documentId,
+          label: item.documentId.charAt(0).toUpperCase() + item.documentId.slice(1)
+        }
+      })
+      setPreviousUploadList(docIds)
+    }
+    _init();
+  }, [])
+
+  const submitClickHandler = async (e) => {
+    e.preventDefault();
+
+    if (selectedFile && SelectedUploadedFileId) {
+      try {
+        const uploadResponse = await uploadDocument(selectedFile)
+        console.log(uploadResponse)
+
+        const submitDocumentResponse = await submitDocument({ documentId: SelectedUploadedFileId })
+        setDocumentId(submitDocumentResponse?.documentId)
+        console.log(submitDocumentResponse)
+
+      }
+      catch (error) {
+        console.error('Error:', error);
+      }
+    }
   }
 
   return (
@@ -53,31 +101,33 @@ const Status = () => {
       <h4 className={styles.tabTitle}>
         Select / Upload document
       </h4>
-      <div>
-        {/* <Input type="file" /> */}
-        <Dropzone
-          onFileChange={selectionChange}
-          text="Click here to upload a recipe document (Word / PDF)"
-        />
-      </div>
-
-      {/* Previous Uploads Section */}
-      <div>
-        <div style={{ marginTop: '1em' }}>
-          Select a previously uploaded document: &nbsp;
-          <Select
-            options={previouslyUploadedDocList}
-            onChange={(e) => { console.log('changed', e) }}
-            value='DOC-12345'
+      <form onSubmit={submitClickHandler}>
+        <div>
+          <Dropzone
+            onFileChange={(file) => setSelectedFile(file)}
+            text="Click here to upload a recipe document (Word / PDF)"
           />
+          {selectedFile && <p>Selected file: {selectedFile.name} &nbsp; <span className='link' onClick={() => setSelectedFile(null)}><svg stroke="currentColor" fill="currentColor" stroke-width="0" version="1.1" viewBox="0 0 16 16" height="10px" width="10px" xmlns="http://www.w3.org/2000/svg"><path d="M15.854 12.854c-0-0-0-0-0-0l-4.854-4.854 4.854-4.854c0-0 0-0 0-0 0.052-0.052 0.090-0.113 0.114-0.178 0.066-0.178 0.028-0.386-0.114-0.529l-2.293-2.293c-0.143-0.143-0.351-0.181-0.529-0.114-0.065 0.024-0.126 0.062-0.178 0.114 0 0-0 0-0 0l-4.854 4.854-4.854-4.854c-0-0-0-0-0-0-0.052-0.052-0.113-0.090-0.178-0.114-0.178-0.066-0.386-0.029-0.529 0.114l-2.293 2.293c-0.143 0.143-0.181 0.351-0.114 0.529 0.024 0.065 0.062 0.126 0.114 0.178 0 0 0 0 0 0l4.854 4.854-4.854 4.854c-0 0-0 0-0 0-0.052 0.052-0.090 0.113-0.114 0.178-0.066 0.178-0.029 0.386 0.114 0.529l2.293 2.293c0.143 0.143 0.351 0.181 0.529 0.114 0.065-0.024 0.126-0.062 0.178-0.114 0-0 0-0 0-0l4.854-4.854 4.854 4.854c0 0 0 0 0 0 0.052 0.052 0.113 0.090 0.178 0.114 0.178 0.066 0.386 0.029 0.529-0.114l2.293-2.293c0.143-0.143 0.181-0.351 0.114-0.529-0.024-0.065-0.062-0.126-0.114-0.178z"></path></svg></span></p>}
         </div>
-        <p className={styles.previousUploadTitle}>
-          Previous Uploads:
-        </p>
-        <Table data={documentData} columns={tableColumns} />
 
-      </div>
-      <Button className="full-width">Submit</Button>
+        {/* Previous Uploads Section */}
+        <div>
+          <div style={{ marginTop: '1em' }}>
+            Select a previously uploaded document: &nbsp;
+            <Select
+              options={previousUploadList}
+              onChange={(e: string) => setSelectedUploadedFileId(e)}
+              value={SelectedUploadedFileId}
+            />
+          </div>
+          <p className={styles.previousUploadTitle}>
+            Previous Uploads:
+          </p>
+          <Table data={previousUploadsTable} columns={tableColumns} />
+
+        </div>
+        <Button disabled={!selectedFile && !SelectedUploadedFileId} type="submit" className="full-width" onClick={submitClickHandler}>Submit</Button>
+      </form>
     </section>
   )
 }
