@@ -1,0 +1,27 @@
+.main {
+    border: 1px solid #c1bfb7;
+    border-radius: 3px;
+    background: white;
+    padding: 15px 30px;
+}
+
+.tabTitle {
+    text-align: center;
+    margin-top: 0;
+}
+
+.previousUploadTitle {
+    text-decoration: underline;
+}
+
+ul.dashedList {
+    list-style: none;
+    margin-left: 0;
+    padding-left: 1em;
+}
+ul.dashedList > li:before {
+    display: inline-block;
+    content: "-";
+    width: 1em;
+    margin-left: -1em;
+}

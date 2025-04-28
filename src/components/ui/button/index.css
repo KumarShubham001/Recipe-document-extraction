@@ -1,0 +1,19 @@
+.custom-button {
+    background: #fbf4de;
+    border: 1px solid #c1bfb7;
+    border-radius: 2px;
+    text-transform: capitalize;
+    font-weight: bold;
+    padding: 10px 30px;
+    min-width: 70px;
+    margin-right: 7px;
+    cursor: pointer;
+
+    &.full-width {
+        width: 100%
+    }
+
+    &.active {
+        background: #dbeafe;
+    }
+}

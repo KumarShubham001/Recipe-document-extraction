@@ -1,0 +1,20 @@
+.progress-bar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+
+    .progress-box {
+        width: 25px;
+        height: 25px;
+        border: 1px solid #c1bfb7;
+
+        &.filled {
+            background: #b2e3b1;
+        }
+
+        &.unfilled {
+            background: #f2f2f2;
+        }
+    }
+}

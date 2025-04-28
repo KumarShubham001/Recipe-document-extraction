@@ -1,0 +1,21 @@
+.dropzone {
+  border: 2px dashed #ccc;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.3s;
+  width: calc(100% - 45px);
+
+  &.dragging, &:hover {
+    border-style: solid;
+    border-color: #777;
+  }
+
+  .file-input {
+    display: none;
+  }
+
+  p {
+    color: #777;
+  }
+}
