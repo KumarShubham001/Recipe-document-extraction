@@ -15,7 +15,7 @@ interface DocumentData1 {
   approvedDate?: string;
 }
 
-const documentData1: DocumentData1 = [{
+const documentData1: DocumentData1[] = [{
   recipeId: 'REC-98765',
   recipeTitle: 'Generic Biologics Downstream process',
   recipeVersion: 1,
@@ -66,6 +66,69 @@ const tableColumns2 = [
   { key: "SequenceNumber", header: "Sequence Number" },
 ];
 
+const tableList = [
+  {
+    title: 'Recipe table',
+    data: documentData1,
+    columns: tableColumns1
+  },
+  {
+    title: 'Unit operation table',
+    data: documentData2,
+    columns: tableColumns2
+  },
+  {
+    title: 'Monitoring Points table',
+    data: documentData2,
+    columns: tableColumns2
+  },
+  {
+    title: 'Activity table',
+    data: documentData2,
+    columns: tableColumns2
+  },
+  {
+    title: 'Parameters table',
+    data: documentData2,
+    columns: tableColumns2
+  },
+  {
+    title: 'Material table',
+    data: documentData2,
+    columns: tableColumns2
+  },
+  {
+    title: 'Unit operation material table',
+    data: documentData2,
+    columns: tableColumns2
+  },
+  {
+    title: 'Sampling point table',
+    data: documentData2,
+    columns: tableColumns2
+  },
+  {
+    title: 'Equipment master table',
+    data: documentData2,
+    columns: tableColumns2
+  },
+  {
+    title: 'Unit operation equipment table',
+    data: documentData2,
+    columns: tableColumns2
+  },
+  {
+    title: 'Parameters general table',
+    data: documentData2,
+    columns: tableColumns2
+  },
+  {
+    title: 'Unit operation comment table',
+    data: documentData2,
+    columns: tableColumns2
+  }
+]
+
 const Status = () => {
   return (
     <section className={styles.main} style={{ width: '100%' }}>
@@ -73,7 +136,7 @@ const Status = () => {
         Extracted Outputs (After validation)
       </h4>
 
-      <div className=''>
+      {/* <div className=''>
         <p className={styles.previousUploadTitle}>
           Recipe table:
         </p>
@@ -89,7 +152,19 @@ const Status = () => {
         <div>
           <Table data={documentData2} columns={tableColumns2} />
         </div>
-      </div>
+      </div> */}
+
+      {tableList.map((table, index) => (
+        <div className='' key={index}>
+          <p className={styles.previousUploadTitle}>
+            {table.title}
+          </p>
+          <div>
+            <Table data={table.data} columns={table.columns} />
+          </div>
+        </div>
+      ))}
+
 
     </section>
   )

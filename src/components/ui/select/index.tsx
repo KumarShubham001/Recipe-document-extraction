@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './style.css';
 
 interface Option {
@@ -10,9 +10,26 @@ interface SelectProps {
     options: Option[];
     onChange: (value: string) => void;
     value?: string;
+    disabled: boolean
 }
 
-const Select: React.FC<SelectProps> = ({ options, onChange, value }) => {
+const Select: React.FC<SelectProps> = ({ options, onChange, value, disabled }) => {
+    const selectRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
     const [isOpen, setIsOpen] = useState(false);
 
     const handleSelect = (optionValue: string) => {
@@ -27,11 +44,12 @@ const Select: React.FC<SelectProps> = ({ options, onChange, value }) => {
     const selectedOption = options.find((option) => option.value === value);
 
     return (
-        <div className="custom-select-container">
+        <div className="custom-select-container" ref={selectRef}>
             <button
                 type="button"
                 className="custom-select-button"
                 onClick={toggleOpen}
+                disabled={disabled}
             >
                 {selectedOption ? selectedOption.label : 'Select an option'}
                 <div
