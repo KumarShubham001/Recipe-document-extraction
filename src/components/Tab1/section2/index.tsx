@@ -38,7 +38,7 @@ const Second: React.FC = () => {
   // }, [])
 
   function navigateToTab2() {
-    // navigate("/validation");
+    navigate("/app/validation");
   }
 
   return (
@@ -50,15 +50,17 @@ const Second: React.FC = () => {
         <div className=''>
           <ProgressBar progress={progress} />
         </div>
-        <p>Extraction log
-        </p>
-        <ul className={styles.dashedList}>
-          <li>{extractLog?.text_tables_extracted} Text and Tables Extracted</li>
-          <li>{extractLog?.attributes_extracted} Attributes Extracted</li>
-          <li>Time Elapsed: {extractLog?.time_elapsed} min</li>
-        </ul>
+        <div>
+          <p>Extraction log
+          </p>
+          <ul className={styles.dashedList}>
+            <li>{extractLog?.text_tables_extracted} Text and Tables Extracted</li>
+            <li>{extractLog?.attributes_extracted} Attributes Extracted</li>
+            <li>Time Elapsed: {extractLog?.time_elapsed} min</li>
+          </ul>
+        </div>
+        <Button onClick={navigateToTab2} className="full-width">Continue to validation</Button>
       </div>
-      <Button onClick={navigateToTab2} className="full-width">Continue to validation</Button>
     </section>
   );
 };

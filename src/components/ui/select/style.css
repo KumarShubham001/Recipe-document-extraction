@@ -15,6 +15,10 @@
     align-items: center;
     justify-content: space-between;
     cursor: pointer;
+
+    &:disabled {
+        cursor: not-allowed;
+    }
 }
 
 .custom-select-arrow {

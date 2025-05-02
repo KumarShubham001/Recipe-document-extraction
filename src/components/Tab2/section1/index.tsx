@@ -24,10 +24,12 @@ const tableColumns = [
   { key: "manualOverride", header: "Manual Override" },
 ];
 
-
-
 const Status = () => {
   const navigate = useNavigate();
+
+  function navigateToTab3() {
+    navigate("/app/output");
+  }
 
   useEffect(() => {
     async function fetchData() {
@@ -45,7 +47,7 @@ const Status = () => {
       <div>
         <Table data={documentData} columns={tableColumns} />
       </div>
-      <Button onClick={() => navigate("/output")} className="full-width">1 Change made, Digitize Recipe?</Button>
+      <Button onClick={navigateToTab3} className="full-width">1 Change made, Digitize Recipe?</Button>
     </section>
   )
 }

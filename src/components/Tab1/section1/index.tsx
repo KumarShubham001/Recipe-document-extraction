@@ -12,6 +12,7 @@ import Select from '../../ui/select';
 
 // styles
 import styles from './style.module.css';
+import { useAuth } from '../../../context/AuthContext';
 
 // interfaces
 interface Option {
@@ -38,32 +39,28 @@ const documentData: DocumentData[] = [
 
 const tableColumns = [{ key: "slNo", header: "Sl No" }, { key: "documentId", header: "Document ID" }, { key: "documentName", header: "Document name" }, { key: "uploadedOn", header: "Uploaded on" }, { key: "uploadedBy", header: "Uploaded by" }, { key: "validated", header: "Validated (Y/N)" }];
 
-const previouslyUploadedDocList: Option[] = [
-  {
-    value: 'DOC-12345',
-    label: 'DOC-12345'
-  },
-  {
-    value: 'DOC-67890',
-    label: 'DOC-67890'
-  }
-]
-
-
+// const previouslyUploadedDocList: Option[] = [
+//   {
+//     value: 'DOC-12345',
+//     label: 'DOC-12345'
+//   },
+//   {
+//     value: 'DOC-67890',
+//     label: 'DOC-67890'
+//   }
+// ]
 
 const Status = () => {
-  const {setDocumentId} = useDocument();
+  const { setDocumentId } = useDocument();
+  const { username } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>();
+  const dropzoneRef = React.useRef<{ clearFile: () => void } | null>(null);
   const [previousUploadList, setPreviousUploadList] = useState<Option[]>([]);
-  const [SelectedUploadedFileId, setSelectedUploadedFileId] = useState<string | undefined>(undefined);
+  const [selectedFileIdFromPrevList, setSelectedFileIdFromPrevList] = useState<string | undefined>(undefined);
   const [previousUploadsTable, setPreviousUploadsTable] = useState<DocumentData[]>(documentData)
 
-  useEffect(() => {
-    const _init = async () => {
-      // use the fetch API call to get the previous upload list
-      // const docList = await getPreviousUploads();
-      const docList = documentData;
-      setPreviousUploadsTable(docList);
+  const updatepreviousuploadlist = (docList) => {
+    setPreviousUploadsTable(docList);
 
       // extract the list of document IDs from the table list
       const docIds: Option[] = docList.map((item) => {
@@ -72,26 +69,55 @@ const Status = () => {
           label: item.documentId.charAt(0).toUpperCase() + item.documentId.slice(1)
         }
       })
-      setPreviousUploadList(docIds)
-    }
-    _init();
-  }, [])
+      setPreviousUploadList(docIds);
+  }
 
+  useEffect(() => {
+    const _init = async () => {
+      // use the fetch API call to get the previous upload list
+      // const docList = await getPreviousUploads();
+      updatepreviousuploadlist(documentData);
+    };
+    _init();
+
+    return () => {
+      // Clear the file when the component unmounts
+      if (dropzoneRef.current) {
+        dropzoneRef.current.clearFile();
+      }
+    }
+  }, [])
+  
   const submitClickHandler = async (e) => {
     e.preventDefault();
 
-    if (selectedFile && SelectedUploadedFileId) {
+    if (selectedFile || selectedFileIdFromPrevList) {
       try {
-        const uploadResponse = await uploadDocument(selectedFile)
-        console.log(uploadResponse)
+        if (selectedFile) {
+          const uploadResponse = await uploadDocument({
+            "file": selectedFile,
+            "username": username
+          })
+          console.log(uploadResponse)
+          if(uploadResponse.uploaded_file) {
+            // setDocumentId()
+          }
+          if(uploadResponse.previous_uploads) {
+            updatepreviousuploadlist(uploadResponse.previous_uploads);
+          }
+        }
 
-        const submitDocumentResponse = await submitDocument({ documentId: SelectedUploadedFileId })
-        setDocumentId(submitDocumentResponse?.documentId)
-        console.log(submitDocumentResponse)
-
+        else if (selectedFileIdFromPrevList) {
+          const submitDocumentResponse = await submitDocument({ documentId: selectedFileIdFromPrevList })
+          setDocumentId(submitDocumentResponse?.documentId)
+          console.log(submitDocumentResponse)
+        }
       }
       catch (error) {
         console.error('Error:', error);
+      }
+      finally {
+
       }
     }
   }
@@ -102,12 +128,16 @@ const Status = () => {
         Select / Upload document
       </h4>
       <form onSubmit={submitClickHandler}>
-        <div>
+        <div style={{ position: "relative" }}>
           <Dropzone
+            ref={dropzoneRef}
             onFileChange={(file) => setSelectedFile(file)}
             text="Click here to upload a recipe document (Word / PDF)"
           />
-          {selectedFile && <p>Selected file: {selectedFile.name} &nbsp; <span className='link' onClick={() => setSelectedFile(null)}><svg stroke="currentColor" fill="currentColor" stroke-width="0" version="1.1" viewBox="0 0 16 16" height="10px" width="10px" xmlns="http://www.w3.org/2000/svg"><path d="M15.854 12.854c-0-0-0-0-0-0l-4.854-4.854 4.854-4.854c0-0 0-0 0-0 0.052-0.052 0.090-0.113 0.114-0.178 0.066-0.178 0.028-0.386-0.114-0.529l-2.293-2.293c-0.143-0.143-0.351-0.181-0.529-0.114-0.065 0.024-0.126 0.062-0.178 0.114 0 0-0 0-0 0l-4.854 4.854-4.854-4.854c-0-0-0-0-0-0-0.052-0.052-0.113-0.090-0.178-0.114-0.178-0.066-0.386-0.029-0.529 0.114l-2.293 2.293c-0.143 0.143-0.181 0.351-0.114 0.529 0.024 0.065 0.062 0.126 0.114 0.178 0 0 0 0 0 0l4.854 4.854-4.854 4.854c-0 0-0 0-0 0-0.052 0.052-0.090 0.113-0.114 0.178-0.066 0.178-0.029 0.386 0.114 0.529l2.293 2.293c0.143 0.143 0.351 0.181 0.529 0.114 0.065-0.024 0.126-0.062 0.178-0.114 0-0 0-0 0-0l4.854-4.854 4.854 4.854c0 0 0 0 0 0 0.052 0.052 0.113 0.090 0.178 0.114 0.178 0.066 0.386 0.029 0.529-0.114l2.293-2.293c0.143-0.143 0.181-0.351 0.114-0.529-0.024-0.065-0.062-0.126-0.114-0.178z"></path></svg></span></p>}
+          {selectedFile && <p>Selected file: {selectedFile.name} &nbsp; <span className='link' onClick={() => {
+            setSelectedFile(null);
+            dropzoneRef.current && dropzoneRef.current.clearFile();
+          }}><svg stroke="currentColor" fill="currentColor" stroke-width="0" version="1.1" viewBox="0 0 16 16" height="10px" width="10px" xmlns="http://www.w3.org/2000/svg"><path d="M15.854 12.854c-0-0-0-0-0-0l-4.854-4.854 4.854-4.854c0-0 0-0 0-0 0.052-0.052 0.090-0.113 0.114-0.178 0.066-0.178 0.028-0.386-0.114-0.529l-2.293-2.293c-0.143-0.143-0.351-0.181-0.529-0.114-0.065 0.024-0.126 0.062-0.178 0.114 0 0-0 0-0 0l-4.854 4.854-4.854-4.854c-0-0-0-0-0-0-0.052-0.052-0.113-0.090-0.178-0.114-0.178-0.066-0.386-0.029-0.529 0.114l-2.293 2.293c-0.143 0.143-0.181 0.351-0.114 0.529 0.024 0.065 0.062 0.126 0.114 0.178 0 0 0 0 0 0l4.854 4.854-4.854 4.854c-0 0-0 0-0 0-0.052 0.052-0.090 0.113-0.114 0.178-0.066 0.178-0.029 0.386 0.114 0.529l2.293 2.293c0.143 0.143 0.351 0.181 0.529 0.114 0.065-0.024 0.126-0.062 0.178-0.114 0-0 0-0 0-0l4.854-4.854 4.854 4.854c0 0 0 0 0 0 0.052 0.052 0.113 0.090 0.178 0.114 0.178 0.066 0.386 0.029 0.529-0.114l2.293-2.293c0.143-0.143 0.181-0.351 0.114-0.529-0.024-0.065-0.062-0.126-0.114-0.178z"></path></svg></span></p>}
         </div>
 
         {/* Previous Uploads Section */}
@@ -116,8 +146,9 @@ const Status = () => {
             Select a previously uploaded document: &nbsp;
             <Select
               options={previousUploadList}
-              onChange={(e: string) => setSelectedUploadedFileId(e)}
-              value={SelectedUploadedFileId}
+              onChange={(e: string) => setSelectedFileIdFromPrevList(e)}
+              value={selectedFileIdFromPrevList}
+              disabled={!!selectedFile}
             />
           </div>
           <p className={styles.previousUploadTitle}>
@@ -126,7 +157,7 @@ const Status = () => {
           <Table data={previousUploadsTable} columns={tableColumns} />
 
         </div>
-        <Button disabled={!selectedFile && !SelectedUploadedFileId} type="submit" className="full-width" onClick={submitClickHandler}>Submit</Button>
+        <Button disabled={!selectedFile && !selectedFileIdFromPrevList} type="submit" className="full-width" onClick={submitClickHandler}>Submit</Button>
       </form>
     </section>
   )
