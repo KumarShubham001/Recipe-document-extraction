@@ -10,7 +10,7 @@ interface SelectProps {
     options: Option[];
     onChange: (value: string) => void;
     value?: string;
-    disabled: boolean
+    disabled?: boolean
 }
 
 const Select: React.FC<SelectProps> = ({ options, onChange, value, disabled }) => {

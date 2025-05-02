@@ -5,6 +5,7 @@ import { useDocument } from '../../../context/DocumentContext';
 import { uploadDocument, submitDocument, getPreviousUploads } from './../../../api';
 
 // UI components
+
 import Button from '../../ui/button';
 import Dropzone from '../../ui/dropzone';
 import Table from '../../ui/table';
@@ -51,25 +52,28 @@ const tableColumns = [{ key: "slNo", header: "Sl No" }, { key: "documentId", hea
 // ]
 
 const Status = () => {
-  const { setDocumentId } = useDocument();
+  const { documentId, setDocumentId } = useDocument();
   const { username } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>();
   const dropzoneRef = React.useRef<{ clearFile: () => void } | null>(null);
+  // for dropdown
   const [previousUploadList, setPreviousUploadList] = useState<Option[]>([]);
+  // curr selected dropdown
   const [selectedFileIdFromPrevList, setSelectedFileIdFromPrevList] = useState<string | undefined>(undefined);
+  // to show in the table
   const [previousUploadsTable, setPreviousUploadsTable] = useState<DocumentData[]>(documentData)
 
   const updatepreviousuploadlist = (docList) => {
     setPreviousUploadsTable(docList);
 
-      // extract the list of document IDs from the table list
-      const docIds: Option[] = docList.map((item) => {
-        return {
-          value: item.documentId,
-          label: item.documentId.charAt(0).toUpperCase() + item.documentId.slice(1)
-        }
-      })
-      setPreviousUploadList(docIds);
+    // extract the list of document IDs from the table list
+    const docIds: Option[] = docList.map((item) => {
+      return {
+        value: item.documentId,
+        label: item.documentId.charAt(0).toUpperCase() + item.documentId.slice(1)
+      }
+    })
+    setPreviousUploadList(docIds);
   }
 
   useEffect(() => {
@@ -87,7 +91,11 @@ const Status = () => {
       }
     }
   }, [])
-  
+
+  const startExtraction = () => {
+    document.dispatchEvent(new Event('startExtraction'));
+  };
+
   const submitClickHandler = async (e) => {
     e.preventDefault();
 
@@ -99,25 +107,27 @@ const Status = () => {
             "username": username
           })
           console.log(uploadResponse)
-          if(uploadResponse.uploaded_file) {
-            // setDocumentId()
+          if (uploadResponse.uploaded_file) {
+            setDocumentId(uploadResponse.uploaded_file.file_id)
           }
-          if(uploadResponse.previous_uploads) {
+          if (uploadResponse.previous_uploads) {
             updatepreviousuploadlist(uploadResponse.previous_uploads);
           }
         }
 
         else if (selectedFileIdFromPrevList) {
-          const submitDocumentResponse = await submitDocument({ documentId: selectedFileIdFromPrevList })
-          setDocumentId(submitDocumentResponse?.documentId)
-          console.log(submitDocumentResponse)
+          const submitDocumentResponse = await submitDocument({
+            "document_id": selectedFileIdFromPrevList,
+            "document_name": previousUploadsTable.find((item) => item.documentId === selectedFileIdFromPrevList)?.documentName,
+            "submitted_by": username
+          })
+          setDocumentId(submitDocumentResponse?.document_id)
         }
+
+        startExtraction();
       }
       catch (error) {
         console.error('Error:', error);
-      }
-      finally {
-
       }
     }
   }
@@ -157,7 +167,7 @@ const Status = () => {
           <Table data={previousUploadsTable} columns={tableColumns} />
 
         </div>
-        <Button disabled={!selectedFile && !selectedFileIdFromPrevList} type="submit" className="full-width" onClick={submitClickHandler}>Submit</Button>
+        <Button disabled={!selectedFile && !selectedFileIdFromPrevList} type="button" className="full-width" onClick={submitClickHandler}>Submit</Button>
       </form>
     </section>
   )

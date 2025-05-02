@@ -9,6 +9,11 @@
     margin-right: 7px;
     cursor: pointer;
 
+    &.stick-to-bottom {
+        position: fixed;
+        bottom: 0;
+    }
+
     &.full-width {
         width: 100%
     }
