@@ -21,21 +21,38 @@ const Second: React.FC = () => {
   const progessInterval = useRef(0);
   const [progress, setProgress] = useState(0);
   const [extractLog, setExtractLog] = useState<Log | undefined>();
+  const [isExtractionCompleted, setIsExtractionCompleted] = useState(false);
 
-  // useEffect(() => {
-  //   progessInterval.current = setInterval(() => {
-  //     getExtractionStatus({ documentId: documentId }).then((res) => {
-  //       console.log(res);
-  //       setProgress(Number(res.status.progress))
-  //     })
-  //     getExtractionLog({ documentId: documentId }).then((res) => {
-  //       console.log(res);
-  //       setExtractLog(res.log)
-  //     })
-  //   }, 1000);
+  const startExtration = () => {
+    progessInterval.current = setInterval(() => {
+      getExtractionStatus({ documentId: documentId }).then((res) => {
+        console.log(res);
+        const progressPer = Number(res.status.progress.replace('%', ''));
+        setProgress(progressPer);
 
-  //   return () => clearInterval(progessInterval.current)
-  // }, [])
+        if (progressPer >= 100) {
+          clearInterval(progessInterval.current);
+          setIsExtractionCompleted(true);
+          fetchExtractionLog();
+        }
+      })
+    }, 1000);
+  }
+
+  useEffect(() => {
+    document.addEventListener('startExtraction', startExtration);
+    return () => {
+      document.removeEventListener('startExtraction', startExtration);
+      clearInterval(progessInterval.current)
+    };
+  }, []);
+
+  const fetchExtractionLog = () => {
+    getExtractionLog({ documentId: documentId }).then((res) => {
+      console.log(res);
+      setExtractLog(res.log)
+    })
+  }
 
   function navigateToTab2() {
     navigate("/app/validation");
@@ -50,16 +67,17 @@ const Second: React.FC = () => {
         <div className=''>
           <ProgressBar progress={progress} />
         </div>
-        <div>
-          <p>Extraction log
-          </p>
-          <ul className={styles.dashedList}>
-            <li>{extractLog?.text_tables_extracted} Text and Tables Extracted</li>
-            <li>{extractLog?.attributes_extracted} Attributes Extracted</li>
-            <li>Time Elapsed: {extractLog?.time_elapsed} min</li>
-          </ul>
+        <div style={{ margin: '15px 0', minHeight: "200px" }}>
+          {isExtractionCompleted && (<>
+            <p>Extraction log</p>
+            <ul className={styles.dashedList}>
+              <li>{extractLog?.text_tables_extracted} Text and Tables Extracted</li>
+              <li>{extractLog?.attributes_extracted} Attributes Extracted</li>
+              <li>Time Elapsed: {extractLog?.time_elapsed} min</li>
+            </ul>
+          </>)}
         </div>
-        <Button onClick={navigateToTab2} className="full-width">Continue to validation</Button>
+        <Button disabled={!isExtractionCompleted} onClick={navigateToTab2} className="full-width">Continue to validation</Button>
       </div>
     </section>
   );

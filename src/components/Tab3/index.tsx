@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Status from './section1/index'
+import First from './section1/index'
 
 import Select from '../ui/select';
 import Button from '../ui/button';
@@ -37,7 +37,7 @@ const Tab3: React.FC = () => {
         </div>
       </div>
       <div className='tab-container'>
-        <Status />
+        <First />
       </div>
     </>
   );
