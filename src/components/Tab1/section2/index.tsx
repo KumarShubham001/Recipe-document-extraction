@@ -19,24 +19,26 @@ const Second: React.FC = () => {
   const navigate = useNavigate();
   const documentInfo = useDocument();
   const progessInterval = useRef(0);
-  const [currDocId, setCurrDocId] = useState();
+  const [startExtractionProcess, setStartExtractionProcess] = useState(false);
   const [progress, setProgress] = useState(0);
   const [extractLog, setExtractLog] = useState<Log | undefined>();
-  const [isExtractionCompleted, setIsExtractionCompleted] = useState(true);
+  const [isExtractionCompleted, setIsExtractionCompleted] = useState(false);
 
   const startExtration = () => {
-	console.log(`Event triggered: "startExtraction"`);
 	
-	if(progessInterval.current) {
+  }
+  
+  useEffect(() => {
+	if(documentInfo.documentId && startExtractionProcess) {
+		console.log(`Event triggered: "startExtraction"`);
+		console.log("Startting extraction for doc with documentId ---->", documentInfo.documentId);
+		
+		if(progessInterval.current) {
 		clearInterval(progessInterval.current);
 	}
 	
    progessInterval.current = setInterval(() => {
-	   
-	   console.log("documentId ---->", currDocId);
-	   
-      if(currDocId) {
-		  getExtractionStatus( currDocId ).then((res) => {
+	  getExtractionStatus( documentInfo.documentId ).then((res) => {
         console.log(res);
         const progressPer = Number(res.status.progress.replace('%', ''));
         setProgress(progressPer);
@@ -44,28 +46,25 @@ const Second: React.FC = () => {
         if (progressPer >= 100) {
           clearInterval(progessInterval.current);
           setIsExtractionCompleted(true);
-          fetchExtractionLog();
+		  setStartExtractionProcess(false);
+          fetchExtractionLog(documentInfo.documentId);
         }
       })
-	  }
     }, 3000);
-  }
-  
-  useEffect(() => {
-	  console.log(documentInfo);
-	  setCurrDocId(documentInfo.documentId);
-  }, [documentInfo])
+	}
+  }, [documentInfo.documentId, startExtractionProcess])
 
   useEffect(() => {
-    document.addEventListener('startExtraction', startExtration);
+    document.addEventListener('startExtraction', () => setStartExtractionProcess(true));
     return () => {
-      document.removeEventListener('startExtraction', startExtration);
+	setStartExtractionProcess(false);
+      document.removeEventListener('startExtraction', () => setStartExtractionProcess(true));
       clearInterval(progessInterval.current)
     };
   }, []);
 
-  const fetchExtractionLog = () => {
-    getExtractionLog({ documentId: documentId }).then((res) => {
+  const fetchExtractionLog = (documentId) => {
+    getExtractionLog(documentId).then((res) => {
       console.log(res);
       setExtractLog(res.log)
     })

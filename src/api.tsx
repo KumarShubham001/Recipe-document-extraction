@@ -48,24 +48,13 @@ export const submitDocument = async (data: any) => {
   });
 };
 
+
 export const getExtractionStatus = async (docId: any) => {
-  return fetchWithBaseUrl(`/get_extraction_status?document_id=${docId}`, {
-    method: "GET",
-    // headers: {
-    //   "Content-Type": "application/json",
-    // },
-    // body: JSON.stringify(data),
-  });
+  return fetchWithBaseUrl(`/extraction-status?document_id=${docId}`, {method: "GET"});
 };
 
-export const getExtractionLog = async (data: any) => {
-  return fetchWithBaseUrl("/get_extraction_log", {
-    method: "GET",
-    // headers: {
-    //   "Content-Type": "application/json",
-    // },
-    // body: JSON.stringify(data),
-  });
+export const getExtractionLog = async (docId: any) => {
+  return fetchWithBaseUrl(`/extraction-log?document_id=${docId}`, {method: "GET"});
 };
 
 // get_extracted_tables
