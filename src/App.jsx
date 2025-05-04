@@ -35,29 +35,29 @@ const MainApp = () => {
       </h1>
       <NavBar links={links} />
       <main className='main'>
-          <Routes>
-            <Route path="/upload" element={<Tab1 username={username} />} />
-            <Route path="/validation" element={<Tab2 />} />
-            <Route path="/output" element={<Tab3 />} />
-          </Routes>
-        </main>
+        <Routes>
+          <Route path="/upload" element={<Tab1 username={username} />} />
+          <Route path="/validation" element={<Tab2 />} />
+          <Route path="/output" element={<Tab3 />} />
+        </Routes>
+      </main>
     </div>
   );
 };
 
 function App() {
   return (
-      <AuthProvider>
-        <DocumentProvider>
-		<Router>
+    <AuthProvider>
+      <DocumentProvider>
+        <Router>
           <Routes>
             <Route path="/" element={<LoginPage />} />
             <Route path="/app/*" element={<MainApp />} />
             <Route path='/*' element={<Navigate to="/" />} />
           </Routes>
-		  </Router>
-        </DocumentProvider>
-      </AuthProvider>
+        </Router>
+      </DocumentProvider>
+    </AuthProvider>
   );
 }
 

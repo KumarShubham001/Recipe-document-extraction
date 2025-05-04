@@ -34,14 +34,6 @@ interface DocumentData {
   validated: string;
 }
 
-// const documentData: DocumentData[] = [
-//   { slNo: 1, document_id: 'DOC001', document_name: 'Document A', uploaded_on: '2023-10-26', uploaded_by: 'User 1', validated: 'Y' },
-//   { slNo: 2, document_id: 'DOC002', document_name: 'Document B', uploaded_on: '2023-10-27', uploaded_by: 'User 2', validated: 'N' },
-//   { slNo: 3, document_id: 'DOC003', document_name: 'Document C', uploaded_on: '2023-10-28', uploaded_by: 'User 3', validated: 'Y' },
-//   { slNo: 4, document_id: 'DOC004', document_name: 'Document D', uploaded_on: '2023-10-29', uploaded_by: 'User 4', validated: 'N' },
-//   { slNo: 5, document_id: 'DOC005', document_name: 'Document E', uploaded_on: '2023-10-30', uploaded_by: 'User 5', validated: 'Y' },
-// ];
-
 const tableColumns = [
   { key: "slNo", header: "Sl No" },
   { key: "document_id", header: "Document ID" },
@@ -51,19 +43,8 @@ const tableColumns = [
   { key: "validated", header: "Validated (Y/N)" },
 ];
 
-// const previouslyUploadedDocList: Option[] = [
-//   {
-//     value: 'DOC-12345',
-//     label: 'DOC-12345'
-//   },
-//   {
-//     value: 'DOC-67890',
-//     label: 'DOC-67890'
-//   }
-// ]
-
 const Status = () => {
-  const { documentId, setDocumentId } = useDocument();
+  const { setDocumentId, setIsLoading } = useDocument();
   const { username } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>();
   const dropzoneRef = React.useRef<{ clearFile: () => void } | null>(null);
@@ -100,9 +81,11 @@ const Status = () => {
 
   useEffect(() => {
     const _init = async () => {
+      setIsLoading(true);
       // use the fetch API call to get the previous upload list
       const docList = await getPreviousUploads();
       updatepreviousuploadlist(docList.documents);
+      setIsLoading(false);
     };
     _init();
 
@@ -115,25 +98,22 @@ const Status = () => {
   }, []);
 
   const startExtraction = () => {
-	console.log(`Dispatching a new event: "startExtraction"`);
+    console.log(`Dispatching a new event: "startExtraction"`);
     document.dispatchEvent(new Event("startExtraction"));
   };
-  
-  useEffect(() => {
-	  console.log(documentId);
-  }, [documentId])
 
   const submitClickHandler = async (e) => {
     e.preventDefault();
 
     if (selectedFile || selectedFileIdFromPrevList) {
       try {
+        setIsLoading(true);
         if (selectedFile) {
           const uploadResponse = await uploadDocument({
             file: selectedFile,
             username: username,
           });
-          console.log(uploadResponse);
+          
           if (uploadResponse.uploaded_file) {
             setDocumentId(uploadResponse.uploaded_file.file_id);
           }
@@ -148,14 +128,16 @@ const Status = () => {
             )?.document_name,
             submitted_by: username,
           });
-		  
-          console.log("docId ---->", String(submitDocumentResponse.document_id));
+
           setDocumentId(String(submitDocumentResponse.document_id));
         }
 
         startExtraction();
       } catch (error) {
         console.error("Error:", error);
+      }
+      finally {
+        setIsLoading(false)
       }
     }
   };
@@ -183,7 +165,7 @@ const Status = () => {
                 <svg
                   stroke="currentColor"
                   fill="currentColor"
-                  stroke-width="0"
+                  strokeWidth="0"
                   version="1.1"
                   viewBox="0 0 16 16"
                   height="10px"
@@ -202,6 +184,7 @@ const Status = () => {
           <div style={{ marginTop: "1em" }}>
             Select a previously uploaded document: &nbsp;
             <Select
+              className="wide-select"
               options={previousUploadList}
               onChange={(e: string) => setSelectedFileIdFromPrevList(e)}
               value={selectedFileIdFromPrevList}
@@ -209,8 +192,8 @@ const Status = () => {
             />
           </div>
           <p className={styles.previousUploadTitle}>Previous Uploads:</p>
-			  {previousUploadsTable.length > 0 && <Table data={previousUploadsTable} columns={tableColumns} />}
-			  {previousUploadsTable.length === 0 && <p>No previous uploads found!</p>}
+          {previousUploadsTable.length > 0 && <Table data={previousUploadsTable} columns={tableColumns} />}
+          {previousUploadsTable.length === 0 && <p>No previous uploads found!</p>}
         </div>
         <Button
           disabled={!selectedFile && !selectedFileIdFromPrevList}

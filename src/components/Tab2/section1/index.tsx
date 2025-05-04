@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  fetchWithBaseUrl,
-  getPreviousUploads,
-  saveValidatedOutputs,
+  getExtractedOutputs,
+  saveValidatedOutputs
 } from "./../../../api";
-
 import Button from "../../ui/button";
-
+import { useDocument } from "../../../context/DocumentContext";
+import { ColumnDef, getEditableRowData } from "../../ui/editableTableRow";
+import StarRating from "../../ui/starRating";
 import Table from "../../ui/table";
-import StarRating from "../StarRating";
+
 import styles from "./style.module.css";
-import { getEditableRowData, ColumnDef } from "../../ui/editableTableRow";
 
 interface DocumentData {
   attribute: string;
@@ -23,6 +22,7 @@ interface DocumentData {
 //   { attribute: "Recipe ID", extractedOutput: "DOC-12345", manualOverride: "-" },
 //   { attribute: "Recipe Title", extractedOutput: "-", manualOverride: "-" },
 // ];
+
 const attributeOptions = ["Recipe ID", "Recipe Title"];
 
 const tableColumns: ColumnDef[] = [
@@ -42,38 +42,36 @@ const tableColumns: ColumnDef[] = [
   { key: "approvedDate", header: "Approved Date", type: "input" },
 ];
 
-const Status = () => {
+const First = ({ selectedTable, selectedDocument }) => {
   const navigate = useNavigate();
-  const [documentData, setDocumentData] = useState<DocumentData[]>([
-    {
-      attribute: "Recipe Id",
-      extractedOutput: "DOC-12345",
-      manualOverride: "-",
-    },
-  ]);
+  const { setIsLoading } = useDocument();
+  const [documentData, setDocumentData] = useState<DocumentData[]>([]);
+  const [rating, setRating] = useState<number>(0);
 
   useEffect(() => {
     async function fetchData() {
-      const data = await getPreviousUploads();
-      console.log("data :", data);
+      const { outputs } = await getExtractedOutputs(selectedDocument, selectedTable);
+      console.log(outputs)
+      setDocumentData(outputs);
+      setIsLoading(false);
     }
-    fetchData();
-  }, []);
 
-  // useEffect(() => {
-  //   const fetchDocuments = async () => {
-  //     const response = await getPreviousUploads();
-  //     console.log("getPreviousUploads", response);
-  //     setDocumentData(response?.documents);
-  //   };
+    if (selectedDocument && selectedTable) {
+      setIsLoading(true)
+      fetchData();
+    }
+  }, [selectedDocument, selectedTable]);
 
-  //   fetchDocuments();
-  // }, []);
+  useEffect(() => {
+    if(rating) {
+      // update rating API here
+    }
+  }, [rating])
 
-  const saveChange = async () => {
+  const digitizeRecipe = async () => {
     const data = {
-      document_id: "DOC-12345",
-      table_name: "Recipe",
+      document_id: selectedDocument,
+      table_name: selectedTable,
       validated_outputs: [
         {
           attribute: "Recipe ID",
@@ -82,9 +80,9 @@ const Status = () => {
         },
       ],
     };
-    const response = await saveValidatedOutputs(data);
-    console.log("response", response);
-    navigate("/output");
+    // const response = await saveValidatedOutputs(data);
+    // console.log("response", response);
+    navigate("/app/output");
   };
 
   const handleAddRow = () => {
@@ -116,7 +114,7 @@ const Status = () => {
         <svg
           stroke="currentColor"
           fill="none"
-          stroke-width="0"
+          strokeWidth="0"
           viewBox="0 0 15 15"
           height="16px"
           width="16px"
@@ -171,7 +169,7 @@ const Status = () => {
   //       <svg
   //         stroke="currentColor"
   //         fill="currentColor"
-  //         stroke-width="0"
+  //         strokeWidth="0"
   //         version="1.1"
   //         viewBox="0 0 16 16"
   //         height="16px"
@@ -188,14 +186,16 @@ const Status = () => {
     <section className={styles.main}>
       <h4 className={styles.tabTitle}>Extracted Outputs</h4>
       <div className="form-element">
-        <StarRating />
+        <StarRating rating={rating} setRating={e => setRating(e)} />
       </div>
 
-      <div>
-        <Button onClick={handleAddRow}> + Add row </Button>
-        <Table data={documentData} columns={tableColumns} />
-      </div>
-      <Button onClick={saveChange} className="full-width">
+      {documentData && <div>
+          <Button onClick={handleAddRow}> + Add row </Button>
+          <Table data={documentData} columns={tableColumns} />
+        </div>
+      }
+
+      <Button onClick={digitizeRecipe} className="full-width" disabled={!documentData}>
         {/* 1 Change made, Digitize Recipe? */}
         Digitize Recipe
       </Button>
@@ -203,4 +203,4 @@ const Status = () => {
   );
 };
 
-export default Status;
+export default First;

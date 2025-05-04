@@ -21,6 +21,10 @@
     }
 }
 
+.custom-select-container.wide-select .custom-select-button {
+    min-width: 200px;
+}
+
 .custom-select-arrow {
     display: flex;
     justify-content: center;

@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import styles from "./style.module.css"
 
-const StarRating = () => {
-  const [rating, setRating] = useState<number>(0);
+const StarRating = ({ rating, setRating }) => {
+  const [currRating, setCurrRating] = useState<number>(rating || 0);
 
   return (
     <div className={styles.rating}>
       {[1, 2, 3, 4, 5]?.map((star) => (
         <span
           key={star}
-          className={`${styles.star} ${star <= rating ? `${styles.filled}` : ""}`}
-          onClick={() => setRating(star)}
+          className={`${styles.star} ${star <= currRating ? `${styles.filled}` : ""}`}
+          onClick={() => { if (setRating) setRating(star); setCurrRating(star) }}
         >
           &#9734;
           {/* unicode for hollow star */}

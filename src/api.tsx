@@ -59,27 +59,19 @@ export const getExtractionLog = async (docId: any) => {
 
 // get_extracted_tables
 export const getExtractedTables = async (docId: any) => {
-  // data={document_id:''}
   return fetchWithBaseUrl(`/extracted-tables?document_id=${docId}`, {
-    method: "GET",
-    // headers: {
-    //   "Content-Type": "application/json",
-    // },
-    // body: JSON.stringify(data),
+    method: "GET"
   });
 };
 
+
 // get_extracted_outputs
-export const getExtractedOutputs = async (data: any) => {
+export const getExtractedOutputs = async (document_id: string, table_name: string) => {
   // data={document_id:'string',  "table_name": "string"
   return fetchWithBaseUrl(
-    `/extracted_outputs?${data.document_id}&&${data.table_name}`,
+    `/extracted-outputs?document_id=${document_id}&table_name=${table_name}`,
     {
-      method: "GET",
-      // headers: {
-      //   "Content-Type": "application/json",
-      // },
-      // body: JSON.stringify(data),
+      method: "GET"
     }
   );
 };
@@ -96,25 +88,13 @@ export const saveValidatedOutputs = async (data: any) => {
 };
 
 // get_attribute_source_page
-export const getAttributeSourcePage = async (data: any) => {
-  return fetchWithBaseUrl(`/attribute-source-page`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
+export const getAttributeSourcePage = async (docId: string, attri: string) => {
+  return fetchWithBaseUrl(`/attribute-source-page?document_id=${docId}&attribute=${attri}`, {method: "GET"});
 };
 
 // get_extraction_prompt
-export const getExtractionPrompt = async (data: any) => {
-  return fetchWithBaseUrl(`/extraction-prompt`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
+export const getExtractionPrompt = async (docId: string, attri: string) => {
+  return fetchWithBaseUrl(`/extraction-prompt?document_id=${docId}&attribute=${attri}`, {method: "GET"});
 };
 
 // regenerate_extraction_output
@@ -132,9 +112,6 @@ export const regenerateExtractionOutput = async (data: any) => {
 export const getValidatedOutputTables = async (data: any) => {
   return fetchWithBaseUrl(`/validated-output-tables`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(data),
   });
 };
@@ -143,9 +120,6 @@ export const getValidatedOutputTables = async (data: any) => {
 export const downloadValidatedOutputTables = async (data: any) => {
   return fetchWithBaseUrl(`/download-validated-output-tables`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(data),
   });
 };

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import Status from "./section1/index";
+import First from "./section1/index";
 import Second from "./section2/index";
 import Third from "./section3/index";
 
@@ -20,17 +20,6 @@ interface DocumentData {
   uploadedBy: string;
   validated: string;
 }
-
-const dropdown1: Option[] = [
-  {
-    value: "DOC-12345",
-    label: "DOC-12345",
-  },
-  {
-    value: "DOC-67890",
-    label: "DOC-67890",
-  },
-];
 
 const dropdown2: Option[] = [
   {
@@ -83,88 +72,86 @@ const dropdown2: Option[] = [
   },
 ];
 
-const tableData = {
-  tables: [
-    {
-      table_id: "string",
-      table_name: "string",
-    },
-  ],
-};
-
 const Tab2: React.FC = () => {
-    const documentId = useDocument();
- console.log('docId in tab 2', documentId) 
-  const [tableList, setTableList] = useState([]);
-  const [previousUploadList, setPreviousUploadList] = useState<Option[]>([]);
-  const [SelectedUploadedFileId, setSelectedUploadedFileId] = useState<
+  const { documentId } = useDocument();
+  const [selectedAttribute, setSelectedAttribute] = useState<string>("")
+  const [tableOptions, setTableOptions] = useState<Option[]>([]);
+  const [selectedTable, setSelectedTable] = useState<
+    string | undefined
+  >(undefined);
+  const [documentOptions, setDocumentOptions] = useState<Option[]>([]);
+  const [selectedDocument, setSelectedDocument] = useState<
     string | undefined
   >(undefined);
 
   useEffect(() => {
     const _init = async () => {
       // use the fetch API call to get the previous upload list
-      const docList = await getPreviousUploads();
-      // const docList = documentData;
-      console.log("doclist", docList);
+      const { documents } = await getPreviousUploads();
 
-      // extract the list of document IDs from the table list
-      const docIds: Option[] = docList?.documents?.map((item) => {
-        return {
-          value: item.document_id,
-          label:
-            item.document_name.charAt(0).toUpperCase() +
-            item.document_name.slice(1),
-        };
-      });
-      setPreviousUploadList(docIds);
+      const docOptions: Option[] = documents.map((item) => ({
+        value: item.document_id,
+        label:
+          item.document_name.charAt(0).toUpperCase() +
+          item.document_name.slice(1),
+      }));
+      setDocumentOptions(docOptions);
     };
     _init();
   }, []);
 
-  useEffect(() => {
-    const fetchExtractedTables = async () => {
-      const response = await getExtractedTables(documentId?.documentId);
-      setTableList(response?.tables);
-    };
+  const fetchExtractedTables = async () => {
+    const { tables } = await getExtractedTables(documentId);
+    const tableOptions = tables.map(table => ({
+      value: table.table_name,
+      label: table.table_name,
+    }));
+    setTableOptions(tableOptions);
+    setSelectedTable(tableOptions[0].value);
+  };
 
+  useEffect(() => {
     fetchExtractedTables();
   }, []);
+
+  useEffect(() => {
+    if (documentId) {
+      setSelectedDocument(documentId)
+    }
+  }, [documentId])
 
   return (
     <>
       <div className="tab-header">
         <div className="form-element">
           Selected document:{" "}
-          {/* <Select
-            options={dropdown1}
-            onChange={(e) => {
-              console.log("changed", e);
-            }}
-            value="DOC-12345"
-          /> */}
           <Select
-            options={previousUploadList}
-            onChange={(e: string) => setSelectedUploadedFileId(e)}
-            value={SelectedUploadedFileId}
+            options={documentOptions}
+            onChange={(e: string) => setSelectedDocument(e)}
+            value={selectedDocument}
+            disabled={true}
           />
         </div>
         <div className="form-element">
           Selected table:{" "}
           <Select
-            options={dropdown2}
-            onChange={(e) => {
-              console.log("changed", e);
-            }}
-            value="recipe"
+            className="wide-select"
+            options={tableOptions}
+            onChange={(e: string) => setSelectedTable(e)}
+            value={selectedTable}
           />
         </div>
       </div>
       <div className="tab-container">
-        <Status />
+        <First selectedTable={selectedTable} selectedDocument={selectedDocument} />
         <section>
-          <Second />
-          <Third />
+          <Second
+            selectedTable={selectedTable}
+            selectedDocument={selectedDocument}
+            selectedAttribute={selectedAttribute}
+            onAttriChange={setSelectedAttribute}
+          />
+          <Third selectedDocument={selectedDocument} selectedAttribute={selectedAttribute} />
         </section>
       </div>
     </>
