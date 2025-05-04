@@ -17,15 +17,26 @@ interface Log {
 
 const Second: React.FC = () => {
   const navigate = useNavigate();
-  const { documentId } = useDocument();
+  const documentInfo = useDocument();
   const progessInterval = useRef(0);
+  const [currDocId, setCurrDocId] = useState();
   const [progress, setProgress] = useState(0);
   const [extractLog, setExtractLog] = useState<Log | undefined>();
-  const [isExtractionCompleted, setIsExtractionCompleted] = useState(false);
+  const [isExtractionCompleted, setIsExtractionCompleted] = useState(true);
 
   const startExtration = () => {
-    progessInterval.current = setInterval(() => {
-      getExtractionStatus({ documentId: documentId }).then((res) => {
+	console.log(`Event triggered: "startExtraction"`);
+	
+	if(progessInterval.current) {
+		clearInterval(progessInterval.current);
+	}
+	
+   progessInterval.current = setInterval(() => {
+	   
+	   console.log("documentId ---->", currDocId);
+	   
+      if(currDocId) {
+		  getExtractionStatus( currDocId ).then((res) => {
         console.log(res);
         const progressPer = Number(res.status.progress.replace('%', ''));
         setProgress(progressPer);
@@ -36,8 +47,14 @@ const Second: React.FC = () => {
           fetchExtractionLog();
         }
       })
-    }, 1000);
+	  }
+    }, 3000);
   }
+  
+  useEffect(() => {
+	  console.log(documentInfo);
+	  setCurrDocId(documentInfo.documentId);
+  }, [documentInfo])
 
   useEffect(() => {
     document.addEventListener('startExtraction', startExtration);

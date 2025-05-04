@@ -34,32 +34,30 @@ const MainApp = () => {
         Recipe Document Extraction Agent
       </h1>
       <NavBar links={links} />
-      <DocumentProvider>
-        <main className='main'>
+      <main className='main'>
           <Routes>
             <Route path="/upload" element={<Tab1 username={username} />} />
             <Route path="/validation" element={<Tab2 />} />
             <Route path="/output" element={<Tab3 />} />
           </Routes>
         </main>
-      </DocumentProvider>
     </div>
   );
 };
 
 function App() {
   return (
-    <Router>
       <AuthProvider>
         <DocumentProvider>
+		<Router>
           <Routes>
             <Route path="/" element={<LoginPage />} />
             <Route path="/app/*" element={<MainApp />} />
             <Route path='/*' element={<Navigate to="/" />} />
           </Routes>
+		  </Router>
         </DocumentProvider>
       </AuthProvider>
-    </Router>
   );
 }
 

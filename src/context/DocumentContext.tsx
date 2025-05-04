@@ -5,7 +5,10 @@ interface DocumentContextProps {
   setDocumentId: (documentId: string | null) => void;
 }
 
-const DocumentContext = createContext<DocumentContextProps | undefined>(undefined);
+const DocumentContext = createContext<DocumentContextProps>({
+  documentId: null,
+  setDocumentId: () => {},
+});
 
 interface DocumentProviderProps {
   children: ReactNode;
@@ -14,13 +17,8 @@ interface DocumentProviderProps {
 export const DocumentProvider: React.FC<DocumentProviderProps> = ({ children }) => {
   const [documentId, setDocumentId] = useState<string | null>(null);
 
-  const contextValue: DocumentContextProps = {
-    documentId,
-    setDocumentId,
-  };
-
   return (
-    <DocumentContext.Provider value={contextValue}>
+    <DocumentContext.Provider value={{ documentId, setDocumentId }}>
       {children}
     </DocumentContext.Provider>
   );

@@ -1,15 +1,17 @@
 .main {
-    border: 1px solid #c1bfb7;
-    border-radius: 3px;
-    background: white;
-    padding: 15px;
+  border: 1px solid #c1bfb7;
+  border-radius: 3px;
+  background: white;
+  padding: 15px;
 }
 
 .tabTitle {
-    text-align: center;
-    margin-top: 0;
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .previousUploadTitle {
-    text-decoration: underline;
+  text-decoration: underline;
 }
+
