@@ -13,3 +13,23 @@
 .previousUploadTitle {
     text-decoration: underline;
 }
+
+.page-outline {
+    border: 1px solid #c1bfb7;
+    background: white;
+    border-radius: 3px;
+    margin: 5px 0;
+    padding: 0px 15px;
+
+    .page-section {
+        background: white;
+        border: 1px solid #c1bfb7;
+        padding: 0px 15px;
+        border-radius: 3px;
+        font-size: 0.9rem;
+
+        &:not(:last-of-type) {
+            border-bottom: 1px solid #c1bfb7;
+        }
+    }
+}

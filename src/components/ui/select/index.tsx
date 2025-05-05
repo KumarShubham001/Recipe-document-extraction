@@ -9,11 +9,12 @@ interface Option {
 interface SelectProps {
     options: Option[];
     onChange: (value: string) => void;
+    className?: string;
     value?: string;
     disabled?: boolean
 }
 
-const Select: React.FC<SelectProps> = ({ options, onChange, value, disabled }) => {
+const Select: React.FC<SelectProps> = ({ options, onChange, value, className, disabled }) => {
     const selectRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -44,7 +45,7 @@ const Select: React.FC<SelectProps> = ({ options, onChange, value, disabled }) =
     const selectedOption = options.find((option) => option.value === value);
 
     return (
-        <div className="custom-select-container" ref={selectRef}>
+        <div className={`custom-select-container ${className}`} ref={selectRef}>
             <button
                 type="button"
                 className="custom-select-button"

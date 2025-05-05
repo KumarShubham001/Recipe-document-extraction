@@ -1,29 +1,35 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import PageLoader from '../components/ui/pageLoader';
 
 interface DocumentContextProps {
   documentId: string | null;
   setDocumentId: (documentId: string | null) => void;
+  isLoading: boolean;
+  setIsLoading: (loading: boolean) => void;
 }
 
-const DocumentContext = createContext<DocumentContextProps | undefined>(undefined);
+const DocumentContext = createContext<DocumentContextProps>({
+  documentId: null,
+  setDocumentId: () => {},
+  isLoading: false,
+  setIsLoading: () => {}
+});
 
 interface DocumentProviderProps {
   children: ReactNode;
 }
 
-export const DocumentProvider: React.FC<DocumentProviderProps> = ({ children }) => {
+export const DocumentProvider: React.FC<DocumentProviderProps> = ({ children }: DocumentProviderProps) => {
   const [documentId, setDocumentId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const contextValue: DocumentContextProps = {
-    documentId,
-    setDocumentId,
-  };
-
-  return (
-    <DocumentContext.Provider value={contextValue}>
-      {children}
-    </DocumentContext.Provider>
-  );
+  return (<>
+      {isLoading && <PageLoader />}
+      <DocumentContext.Provider value={{ documentId, setDocumentId, isLoading, setIsLoading }}>
+        {children}
+      </DocumentContext.Provider>
+    </>
+  )
 };
 
 export const useDocument = () => {

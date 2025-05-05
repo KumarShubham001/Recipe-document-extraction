@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 
 import Table from '../../ui/table';
 import styles from './style.module.css';
+import { useDocument } from '../../../context/DocumentContext';
+import { downloadValidatedOutputTables, getValidatedOutputTables } from '../../../api';
 
 interface DocumentData1 {
   recipeId: string;
@@ -130,6 +132,78 @@ const tableList = [
 ]
 
 const Status = () => {
+  const { documentId, setIsLoading } = useDocument();
+  const [currDocid, setCurrDocId] = useState(documentId);
+  const [validatedTables, setValidatedTables] = useState<any>([])
+
+  const fetchValidatedTables = async (docId) => {
+    try {
+      setIsLoading(true);
+      const data = {
+        "document_id": docId
+      }
+      // let res = await getValidatedOutputTables(data);
+      const {validated_tables} = {
+        "validated_tables": [
+          {
+            "table_name": "Recipe table",
+            "columns": [
+              "DOCUMENT_ID",
+              "DOCUMENT_NAME",
+              "VERSION",
+              "DOCUMENT_TYPE",
+              "PRODUCT",
+              "DESCRIPTION",
+              "APPROVED_DATE"
+            ],
+            "rows": [
+              [
+                "Doc-12345",
+                "Generic Biologics Example Site Specific Downstream Process Description",
+                "1",
+                "Site Specific Downstream Process Description",
+                "Generic Biologic",
+                "This document describes the drug substance manufacturing (Indicate is molecule is Drug Substance or a mAb Intermediate) operations for Generic Biologics from protein A chromatography through drug substance storage for the Pharma Biologics manufacturing facility. The downstream manufacturing process concludes at the transfer of drug substance from the initial -80°C freeze to drug substance storage at -30°C",
+                "03 March 2025"
+              ]
+            ]
+          }
+        ]
+      }
+
+      const tableData = validated_tables.map(table => {
+        const cols = table.columns.map(e => ({ key: String(e).trim(), header: String(e).trim() }));
+        const rows = table.rows.map(row => {
+          const data = {};
+          cols.forEach((col, index) => {
+            data[col.key] = row[index];
+          });
+          return data;
+        });
+
+        return {columns: cols, rows: rows, table_name: table.table_name}
+      })
+      console.log(tableData)
+      setValidatedTables(tableData);
+    }
+    catch (e) {
+      console.error(e)
+    }
+    finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (currDocid) {
+      fetchValidatedTables(currDocid);
+    }
+  }, [currDocid])
+
+  useEffect(() => {
+    setCurrDocId(documentId)
+  }, [documentId])
+
   return (
     <section className={styles.main} style={{ width: '100%' }}>
       <h4 className={styles.tabTitle}>
@@ -154,13 +228,13 @@ const Status = () => {
         </div>
       </div> */}
 
-      {tableList.map((table, index) => (
+      {validatedTables.map((table, index) => (
         <div className='' key={index}>
           <p className={styles.previousUploadTitle}>
-            {table.title}
+            {table.table_name}
           </p>
           <div>
-            <Table data={table.data} columns={table.columns} />
+            <Table data={table.rows} columns={table.columns} />
           </div>
         </div>
       ))}

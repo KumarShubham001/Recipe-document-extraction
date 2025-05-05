@@ -17,41 +17,60 @@ interface Log {
 
 const Second: React.FC = () => {
   const navigate = useNavigate();
-  const { documentId } = useDocument();
+  const documentInfo = useDocument();
   const progessInterval = useRef(0);
+  const [startExtractionProcess, setStartExtractionProcess] = useState(false);
   const [progress, setProgress] = useState(0);
   const [extractLog, setExtractLog] = useState<Log | undefined>();
   const [isExtractionCompleted, setIsExtractionCompleted] = useState(false);
 
-  const startExtration = () => {
-    progessInterval.current = setInterval(() => {
-      getExtractionStatus({ documentId: documentId }).then((res) => {
-        console.log(res);
-        const progressPer = Number(res.status.progress.replace('%', ''));
-        setProgress(progressPer);
+  useEffect(() => {
+    if (documentInfo.documentId && startExtractionProcess) {
+      console.log(`Event triggered: "startExtraction"`);
+      console.log("Startting extraction for doc with documentId ---->", documentInfo.documentId);
 
-        if (progressPer >= 100) {
-          clearInterval(progessInterval.current);
-          setIsExtractionCompleted(true);
-          fetchExtractionLog();
-        }
-      })
-    }, 1000);
-  }
+      if (progessInterval.current) {
+        clearInterval(progessInterval.current);
+      }
+
+      progessInterval.current = setInterval(() => {
+        getExtractionStatus(documentInfo.documentId).then((res) => {
+          const progressPer = Number(res.status.progress.replace('%', ''));
+          setProgress(progressPer);
+
+          if (progressPer >= 100) {
+            clearInterval(progessInterval.current);
+            setIsExtractionCompleted(true);
+            setStartExtractionProcess(false);
+            fetchExtractionLog(documentInfo.documentId);
+          }
+        })
+      }, 3000);
+    }
+  }, [documentInfo.documentId, startExtractionProcess])
 
   useEffect(() => {
-    document.addEventListener('startExtraction', startExtration);
+    document.addEventListener('startExtraction', () => setStartExtractionProcess(true));
     return () => {
-      document.removeEventListener('startExtraction', startExtration);
+      setStartExtractionProcess(false);
+      document.removeEventListener('startExtraction', () => setStartExtractionProcess(true));
       clearInterval(progessInterval.current)
     };
   }, []);
 
-  const fetchExtractionLog = () => {
-    getExtractionLog({ documentId: documentId }).then((res) => {
-      console.log(res);
-      setExtractLog(res.log)
-    })
+  const fetchExtractionLog = (documentId) => {
+    documentInfo.setIsLoading(true);
+    try {
+      getExtractionLog(documentId).then((res) => {
+        setExtractLog(res.log);
+      })
+    }
+    catch (e) {
+      console.log(e);
+    }
+    finally {
+      documentInfo.setIsLoading(false);
+    }
   }
 
   function navigateToTab2() {
@@ -73,7 +92,7 @@ const Second: React.FC = () => {
             <ul className={styles.dashedList}>
               <li>{extractLog?.text_tables_extracted} Text and Tables Extracted</li>
               <li>{extractLog?.attributes_extracted} Attributes Extracted</li>
-              <li>Time Elapsed: {extractLog?.time_elapsed} min</li>
+              <li>Time Elapsed: {extractLog?.time_elapsed}</li>
             </ul>
           </>)}
         </div>

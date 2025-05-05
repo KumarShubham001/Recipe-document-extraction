@@ -1,6 +1,9 @@
-const BASE_URL = 'http://localhost:8081';
+const BASE_URL = "http://localhost:8000/api/v1";
 
-export const fetchWithBaseUrl = async (url: string, options: RequestInit = {}) => {
+export const fetchWithBaseUrl = async (
+  url: string,
+  options: RequestInit = {}
+) => {
   const fullUrl = `${BASE_URL}${url}`;
   const response = await fetch(fullUrl, options);
   if (!response.ok) {
@@ -10,135 +13,113 @@ export const fetchWithBaseUrl = async (url: string, options: RequestInit = {}) =
 };
 
 export const getPreviousUploads = async () => {
-  return fetchWithBaseUrl('/previous-uploads', { method: "GET" });
+  return fetchWithBaseUrl("/uploaded-documents", { method: "GET" });
 };
 
-export const uploadDocument = async (data:any) => {
-  const formData = new FormData();
-  formData.append('file', data.file);
-  formData.append('username', data.username);
-  return fetchWithBaseUrl('/upload', {
-    method: 'POST',
-    body: formData,
-  });
+export const uploadDocument = async (data: any) => {
+  try {
+    const formData = new FormData();
+    formData.append('file', data.file);
+
+    const response = await fetch(`${BASE_URL}/upload`, {
+      method: 'POST',
+      body: formData,
+	  headers: {
+        'X-User-Name': data.username
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const submitDocument = async (data: any) => {
-  return fetchWithBaseUrl('/submit-document', {
-    method: 'POST',
+  return fetchWithBaseUrl("/submit-document", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
   });
 };
 
-export const getExtractionStatus = async (data: any) => {
-  return fetchWithBaseUrl('/get_extraction_status', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+
+export const getExtractionStatus = async (docId: any) => {
+  return fetchWithBaseUrl(`/extraction-status?document_id=${docId}`, {method: "GET"});
 };
 
-export const getExtractionLog = async (data: any) => {
-  return fetchWithBaseUrl('/get_extraction_log', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+export const getExtractionLog = async (docId: any) => {
+  return fetchWithBaseUrl(`/extraction-log?document_id=${docId}`, {method: "GET"});
 };
 
 // get_extracted_tables
-export const getExtractedTables = async (data: any) => {
-  // data={document_id:''}
-  return fetchWithBaseUrl(`/api/extracted-tables`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
+export const getExtractedTables = async (docId: any) => {
+  return fetchWithBaseUrl(`/extracted-tables?document_id=${docId}`, {
+    method: "GET"
   });
 };
 
+
 // get_extracted_outputs
-export const getExtractedOutputs  = async (data: any) => {
+export const getExtractedOutputs = async (document_id: string, table_name: string) => {
   // data={document_id:'string',  "table_name": "string"
-  return fetchWithBaseUrl(`/api/extracted_outputs`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+  return fetchWithBaseUrl(
+    `/extracted-outputs?document_id=${document_id}&table_name=${table_name}`,
+    {
+      method: "GET"
+    }
+  );
 };
 
 // save_validated_outputs
-export const saveValidatedOutputs  = async (data: any) => {
-  return fetchWithBaseUrl(`/api/save-validated-outputs`, {
-    method: 'POST',
+export const saveValidatedOutputs = async (data: any) => {
+  return fetchWithBaseUrl(`/save-validated-outputs`, {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
   });
 };
 
 // get_attribute_source_page
-export const getAttributeSourcePage  = async (data: any) => {
-  return fetchWithBaseUrl(`/api/attribute-source-page`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+export const getAttributeSourcePage = async (docId: string, attri: string) => {
+  return fetchWithBaseUrl(`/attribute-source-page?document_id=${docId}&attribute=${attri}`, {method: "GET"});
 };
 
 // get_extraction_prompt
-export const getExtractionPrompt  = async (data: any) => {
-  return fetchWithBaseUrl(`/api/extraction-prompt`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+export const getExtractionPrompt = async (docId: string, attri: string) => {
+  return fetchWithBaseUrl(`/extraction-prompt?document_id=${docId}&attribute=${attri}`, {method: "GET"});
 };
 
 // regenerate_extraction_output
-export const regenerateExtractionOutput  = async (data: any) => {
-  return fetchWithBaseUrl(`/api/regenerate-extraction`, {
-    method: 'POST',
+export const regenerateExtractionOutput = async (data: any) => {
+  return fetchWithBaseUrl(`/regenerate-extraction`, {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
   });
 };
 
 // get_validated_output_tables
-export const getValidatedOutputTables  = async (data: any) => {
-  return fetchWithBaseUrl(`/api/validated-output-tables`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+export const getValidatedOutputTables = async (data: any) => {
+  return fetchWithBaseUrl(`/validated-output-tables`, {
+    method: "POST",
     body: JSON.stringify(data),
   });
 };
 
 // download_validated_output_tables
-export const downloadValidatedOutputTables  = async (data: any) => {
-  return fetchWithBaseUrl(`/api/download-validated-output-tables`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+export const downloadValidatedOutputTables = async (data: any) => {
+  return fetchWithBaseUrl(`/download-validated-output-tables`, {
+    method: "POST",
     body: JSON.stringify(data),
   });
 };
