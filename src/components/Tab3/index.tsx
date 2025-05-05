@@ -75,7 +75,7 @@ const Tab3: React.FC = () => {
           />
         </div>
         <div className='form-element'>
-          <Button onClick={downloadValidatedTables}>Download Tables</Button>
+          <Button disabled={!selectedDoc} onClick={downloadValidatedTables}>Download Tables</Button>
         </div>
       </div>
       <div className='tab-container'>

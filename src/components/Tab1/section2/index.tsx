@@ -17,59 +17,88 @@ interface Log {
 
 const Second: React.FC = () => {
   const navigate = useNavigate();
-  const documentInfo = useDocument();
+  const { documentId, setIsLoading } = useDocument();
   const progessInterval = useRef(0);
+
+  // used to toggle intro page
+  const [showIntro, setShowIntro] = useState(true);
+
+  // used to trigger extraction process
   const [startExtractionProcess, setStartExtractionProcess] = useState(false);
+
+  // used to track progress of the extraction
   const [progress, setProgress] = useState(0);
+
+  // used to store the extraction log, once the extraction is done
   const [extractLog, setExtractLog] = useState<Log | undefined>();
-  const [isExtractionCompleted, setIsExtractionCompleted] = useState(false);
+
+  // used to toggle the extraction log on UI
+  const [showExtractionLog, setShowExtractionLog] = useState(false);
 
   useEffect(() => {
-    if (documentInfo.documentId && startExtractionProcess) {
+    if (documentId && startExtractionProcess) {
+      setShowIntro(false);
+      setProgress(0);
+      setShowExtractionLog(false);
+
       console.log(`Event triggered: "startExtraction"`);
-      console.log("Startting extraction for doc with documentId ---->", documentInfo.documentId);
+      console.log("Startting extraction for doc with documentId ---->", documentId);
 
       if (progessInterval.current) {
         clearInterval(progessInterval.current);
       }
 
       progessInterval.current = setInterval(() => {
-        getExtractionStatus(documentInfo.documentId).then((res) => {
+        getExtractionStatus(documentId).then((res) => {
           const progressPer = Number(res.status.progress.replace('%', ''));
           setProgress(progressPer);
 
           if (progressPer >= 100) {
             clearInterval(progessInterval.current);
-            setIsExtractionCompleted(true);
             setStartExtractionProcess(false);
-            fetchExtractionLog(documentInfo.documentId);
+            fetchExtractionLog(documentId);
           }
         })
       }, 3000);
     }
-  }, [documentInfo.documentId, startExtractionProcess])
+  }, [documentId, startExtractionProcess]);
+
+  const startExtraction = () => {
+    setStartExtractionProcess(true);
+  }
 
   useEffect(() => {
-    document.addEventListener('startExtraction', () => setStartExtractionProcess(true));
+    resetExtractionProcess();
+    document.addEventListener('startExtraction', startExtraction);
+
     return () => {
-      setStartExtractionProcess(false);
-      document.removeEventListener('startExtraction', () => setStartExtractionProcess(true));
-      clearInterval(progessInterval.current)
-    };
+      resetExtractionProcess();
+    }
   }, []);
 
+  const resetExtractionProcess = () => {
+    setShowIntro(true);
+    setProgress(0);
+    setExtractLog(undefined);
+    setShowExtractionLog(false);
+    setStartExtractionProcess(false);
+    document.removeEventListener('startExtraction', startExtraction);
+    clearInterval(progessInterval.current);
+  }
+
   const fetchExtractionLog = (documentId) => {
-    documentInfo.setIsLoading(true);
+    setIsLoading(true);
     try {
       getExtractionLog(documentId).then((res) => {
         setExtractLog(res.log);
+        setShowExtractionLog(true);
       })
     }
     catch (e) {
       console.log(e);
     }
     finally {
-      documentInfo.setIsLoading(false);
+      setIsLoading(false);
     }
   }
 
@@ -82,22 +111,31 @@ const Second: React.FC = () => {
       <h4 className={styles.tabTitle}>
         Status Update on Extraction
       </h4>
-      <div>
+
+      {!showIntro && <div>
         <div className=''>
           <ProgressBar progress={progress} />
         </div>
-        <div style={{ margin: '15px 0', minHeight: "200px" }}>
-          {isExtractionCompleted && (<>
-            <p>Extraction log</p>
+        <div style={{ margin: '45px 0', minHeight: "200px" }}>
+          <p>Extraction log</p>
+          {showExtractionLog && (<>
             <ul className={styles.dashedList}>
               <li>{extractLog?.text_tables_extracted} Text and Tables Extracted</li>
               <li>{extractLog?.attributes_extracted} Attributes Extracted</li>
               <li>Time Elapsed: {extractLog?.time_elapsed}</li>
             </ul>
           </>)}
+          {!showExtractionLog && <p className={styles.tabDesc}>
+            Please wait while we extract the data from the document.
+          </p>}
         </div>
-        <Button disabled={!isExtractionCompleted} onClick={navigateToTab2} className="full-width">Continue to validation</Button>
-      </div>
+        <Button disabled={!showExtractionLog} onClick={navigateToTab2} className="full-width">Continue to validation</Button>
+      </div>}
+
+      {showIntro && <p>
+        Upload a new recipe document or select a previously uploaded document and click on the 'Submit' button to start the extraction process.
+      </p>}
+
     </section>
   );
 };

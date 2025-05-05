@@ -4,7 +4,7 @@ import styles from './index.module.css';
 interface TableProps<T> {
   data: T[];
   columns: {
-    key: keyof T;
+    key: string;
     header: string;
   }[];
 }
