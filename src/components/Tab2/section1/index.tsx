@@ -8,6 +8,7 @@ import Button from "../../ui/button";
 import { useDocument } from "../../../context/DocumentContext";
 import { ColumnDef, getEditableRowData } from "../../ui/editableTableRow";
 import StarRating from "../../ui/starRating";
+import Feedback from "../../ui/feedback";
 import Table from "../../ui/table";
 
 import styles from "./style.module.css";
@@ -63,10 +64,15 @@ const First = ({ selectedTable, selectedDocument }) => {
   }, [selectedDocument, selectedTable]);
 
   useEffect(() => {
-    if(rating) {
+    if (rating) {
       // update rating API here
     }
-  }, [rating])
+  }, [rating]);
+
+  const saveFeedback = (feedback) => {
+    // save feedback API here
+    console.log("Saving feedback: " + feedback);
+  };
 
   const digitizeRecipe = async () => {
     const data = {
@@ -185,14 +191,18 @@ const First = ({ selectedTable, selectedDocument }) => {
   return (
     <section className={styles.main}>
       <h4 className={styles.tabTitle}>Extracted Outputs</h4>
-      <div className="form-element">
+      <div className={styles['button-group-inline']}>
         <StarRating rating={rating} setRating={e => setRating(e)} />
+        <Feedback title="Feedback" onSaveFeedback={saveFeedback} />
       </div>
 
       {documentData && <div>
-          <Button onClick={handleAddRow}> + Add row </Button>
-          <Table data={documentData} columns={tableColumns} />
+        <div className={styles['button-group']}>
+          <Button onClick={handleAddRow}>Add Row</Button>
+          <Button onClick={handleAddRow}>Revert to AI generate outputs</Button>
         </div>
+        <Table data={documentData} columns={tableColumns} />
+      </div>
       }
 
       <Button onClick={digitizeRecipe} className="full-width" disabled={!documentData}>

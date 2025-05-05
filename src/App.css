@@ -14,19 +14,23 @@
     nav {
         margin-bottom: 30px;
 
-        .nav-button {
-            background: #ffffff;
-            border: 1px solid #3b82f6;
-            text-transform: capitalize;
-            font-weight: bold;
-            padding: 5px 30px;
-            min-width: 70px;
-            margin-right: 7px;
-            border-radius: 2px;
-            cursor: default;
+        a {
+            .nav-button {
+                background: #ffffff;
+                border: 1px solid #3b82f6;
+                text-transform: capitalize;
+                font-weight: bold;
+                padding: 5px 30px;
+                min-width: 70px;
+                margin-right: 7px;
+                border-radius: 2px;
+                cursor: pointer;
+            }
 
             &.active {
-                background: #d9e8ff;
+                .nav-button {
+                    background: #d9e8ff;
+                }
             }
         }
     }
@@ -46,16 +50,17 @@
             }
         }
     }
+
     .tab-container {
         display: flex;
         justify-content: space-between;
         align-items: stretch;
         column-gap: 30px;
 
-        & > section {
+        &>section {
             width: 100%;
 
-            & > section:not(:first-of-type) {
+            &>section:not(:first-of-type) {
                 margin-top: 5px;
             }
         }

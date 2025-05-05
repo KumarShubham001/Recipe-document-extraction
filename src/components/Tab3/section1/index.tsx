@@ -131,9 +131,8 @@ const tableList = [
   }
 ]
 
-const Status = () => {
-  const { documentId, setIsLoading } = useDocument();
-  const [currDocid, setCurrDocId] = useState(documentId);
+const Status = ({selectedDoc}) => {
+  const { setIsLoading } = useDocument();
   const [validatedTables, setValidatedTables] = useState<any>([])
 
   const fetchValidatedTables = async (docId) => {
@@ -195,14 +194,10 @@ const Status = () => {
   }
 
   useEffect(() => {
-    if (currDocid) {
-      fetchValidatedTables(currDocid);
+    if (selectedDoc) {
+      fetchValidatedTables(selectedDoc);
     }
-  }, [currDocid])
-
-  useEffect(() => {
-    setCurrDocId(documentId)
-  }, [documentId])
+  }, [selectedDoc])
 
   return (
     <section className={styles.main} style={{ width: '100%' }}>

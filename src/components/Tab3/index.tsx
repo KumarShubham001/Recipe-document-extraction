@@ -79,7 +79,7 @@ const Tab3: React.FC = () => {
         </div>
       </div>
       <div className='tab-container'>
-        <First />
+        <First selectedDoc={selectedDoc} />
       </div>
     </>
   );
