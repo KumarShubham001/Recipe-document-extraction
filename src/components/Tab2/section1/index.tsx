@@ -29,7 +29,7 @@ interface TableData {
 
 const First = ({ selectedTable, selectedDocument }) => {
   const navigate = useNavigate();
-  const { setIsLoading } = useDocument();
+  const { setDocumentId, setIsLoading } = useDocument();
   const [extractedTable, setExtractedTable] = useState<TableData | undefined>(undefined);
   const [extractedTableOg, setExtractedTableOg] = useState<any | undefined>(undefined);
   const [rating, setRating] = useState<number>(0);
@@ -165,6 +165,8 @@ const First = ({ selectedTable, selectedDocument }) => {
     };
     // const response = await saveValidatedOutputs(data);
     // console.log("response", response);
+
+    setDocumentId(selectedDocument);
     navigate("/app/output");
   };
 
