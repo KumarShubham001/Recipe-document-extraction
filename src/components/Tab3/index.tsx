@@ -51,7 +51,8 @@ const Tab3: React.FC = () => {
     try {
       setIsLoading(true);
       const data = {
-        "document_id": selectedDoc
+        "document_id": selectedDoc,
+        
       }
       const res = await downloadValidatedOutputTables(data);
       console.log(res);

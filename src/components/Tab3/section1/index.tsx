@@ -141,34 +141,34 @@ const Status = ({ selectedDoc }) => {
       const data = {
         "document_id": docId
       }
-      // let res = await getValidatedOutputTables(data);
-      const { validated_tables } = {
-        "validated_tables": [
-          {
-            "table_name": "Recipe table",
-            "columns": [
-              "DOCUMENT_ID",
-              "DOCUMENT_NAME",
-              "VERSION",
-              "DOCUMENT_TYPE",
-              "PRODUCT",
-              "DESCRIPTION",
-              "APPROVED_DATE"
-            ],
-            "rows": [
-              [
-                "Doc-12345",
-                "Generic Biologics Example Site Specific Downstream Process Description",
-                "1",
-                "Site Specific Downstream Process Description",
-                "Generic Biologic",
-                "This document describes the drug substance manufacturing (Indicate is molecule is Drug Substance or a mAb Intermediate) operations for Generic Biologics from protein A chromatography through drug substance storage for the Pharma Biologics manufacturing facility. The downstream manufacturing process concludes at the transfer of drug substance from the initial -80°C freeze to drug substance storage at -30°C",
-                "03 March 2025"
-              ]
-            ]
-          }
-        ]
-      }
+      let res = await getValidatedOutputTables(data);
+      // const { validated_tables } = {
+      //   "validated_tables": [
+      //     {
+      //       "table_name": "Recipe table",
+      //       "columns": [
+      //         "DOCUMENT_ID",
+      //         "DOCUMENT_NAME",
+      //         "VERSION",
+      //         "DOCUMENT_TYPE",
+      //         "PRODUCT",
+      //         "DESCRIPTION",
+      //         "APPROVED_DATE"
+      //       ],
+      //       "rows": [
+      //         [
+      //           "Doc-12345",
+      //           "Generic Biologics Example Site Specific Downstream Process Description",
+      //           "1",
+      //           "Site Specific Downstream Process Description",
+      //           "Generic Biologic",
+      //           "This document describes the drug substance manufacturing (Indicate is molecule is Drug Substance or a mAb Intermediate) operations for Generic Biologics from protein A chromatography through drug substance storage for the Pharma Biologics manufacturing facility. The downstream manufacturing process concludes at the transfer of drug substance from the initial -80°C freeze to drug substance storage at -30°C",
+      //           "03 March 2025"
+      //         ]
+      //       ]
+      //     }
+      //   ]
+      // }
 
       const tableData = validated_tables.map(table => {
         const cols = table.columns.map(e => ({ key: String(e).trim(), header: String(e).trim() }));
@@ -182,6 +182,7 @@ const Status = ({ selectedDoc }) => {
 
         return { columns: cols, rows: rows, table_name: table.table_name }
       })
+      
       console.log(tableData)
       setValidatedTables(tableData);
     }

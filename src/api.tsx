@@ -24,7 +24,7 @@ export const uploadDocument = async (data: any) => {
     const response = await fetch(`${BASE_URL}/upload`, {
       method: 'POST',
       body: formData,
-	  headers: {
+      headers: {
         'X-User-Name': data.username
       },
     });
@@ -50,11 +50,11 @@ export const submitDocument = async (data: any) => {
 
 
 export const getExtractionStatus = async (docId: any) => {
-  return fetchWithBaseUrl(`/extraction-status?document_id=${docId}`, {method: "GET"});
+  return fetchWithBaseUrl(`/extraction-status?document_id=${docId}`, { method: "GET" });
 };
 
 export const getExtractionLog = async (docId: any) => {
-  return fetchWithBaseUrl(`/extraction-log?document_id=${docId}`, {method: "GET"});
+  return fetchWithBaseUrl(`/extraction-log?document_id=${docId}`, { method: "GET" });
 };
 
 // get_extracted_tables
@@ -89,12 +89,12 @@ export const saveValidatedOutputs = async (data: any) => {
 
 // get_attribute_source_page
 export const getAttributeSourcePage = async (docId: string, attri: string) => {
-  return fetchWithBaseUrl(`/attribute-source-page?document_id=${docId}&attribute=${attri}`, {method: "GET"});
+  return fetchWithBaseUrl(`/attribute-source-page?document_id=${docId}&attribute=${attri}`, { method: "GET" });
 };
 
 // get_extraction_prompt
 export const getExtractionPrompt = async (docId: string, attri: string) => {
-  return fetchWithBaseUrl(`/extraction-prompt?document_id=${docId}&attribute=${attri}`, {method: "GET"});
+  return fetchWithBaseUrl(`/extraction-prompt?document_id=${docId}&attribute=${attri}`, { method: "GET" });
 };
 
 // regenerate_extraction_output
@@ -112,6 +112,9 @@ export const regenerateExtractionOutput = async (data: any) => {
 export const getValidatedOutputTables = async (data: any) => {
   return fetchWithBaseUrl(`/validated-output-tables`, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(data),
   });
 };
@@ -120,6 +123,9 @@ export const getValidatedOutputTables = async (data: any) => {
 export const downloadValidatedOutputTables = async (data: any) => {
   return fetchWithBaseUrl(`/download-validated-output-tables`, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(data),
   });
 };

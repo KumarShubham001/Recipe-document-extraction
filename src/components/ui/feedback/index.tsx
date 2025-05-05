@@ -47,7 +47,7 @@ const Feedback = ({ title, onSaveFeedback }) => {
     return (
         <>
             <div className={styles['feedback-icon']} onClick={handleOpenPopup} title={title}>
-                <svg stroke="currentColor" fill="none" stroke-width="1" viewBox="0 0 32 32" stroke-linecap="round" stroke-linejoin="round" height="32px" width="32px" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <svg stroke="currentColor" fill="none" strokeWidth="1" viewBox="0 0 32 32" strokeLinecap="round" strokeLinejoin="round" height="32px" width="32px" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
             </div>
             <FeedbackPopup
                 title="Please provide your feedbacks here:"
