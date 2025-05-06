@@ -101,17 +101,19 @@ const Tab2: React.FC = () => {
   }, []);
 
   const fetchExtractedTables = async (selectedDocument) => {
-    const { tables } = await getExtractedTables(selectedDocument);
-    const tableOptions = tables.map(table => ({
-      value: table.table_name,
-      label: table.table_name,
+    const { table_names } = await getExtractedTables(selectedDocument);
+    const tableOptions = table_names.map(table => ({
+      value: table,
+      label:
+        table.charAt(0).toUpperCase() +
+        table.slice(1),
     }));
     setTableOptions(tableOptions);
     setSelectedTable(tableOptions[0].value);
   };
 
   useEffect(() => {
-    if(selectedDocument) {
+    if (selectedDocument) {
       fetchExtractedTables(selectedDocument);
     }
   }, [selectedDocument]);
@@ -131,7 +133,7 @@ const Tab2: React.FC = () => {
             options={documentOptions}
             onChange={(e: string) => setSelectedDocument(e)}
             value={selectedDocument}
-            // disabled={true}
+          // disabled={true}
           />
         </div>
         <div className="form-element">
