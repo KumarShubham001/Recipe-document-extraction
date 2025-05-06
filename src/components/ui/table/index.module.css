@@ -52,3 +52,7 @@ th {
     text-align: center;
     text-transform: capitalize;
 }
+
+td.modified {
+  background: #f98b85;
+}

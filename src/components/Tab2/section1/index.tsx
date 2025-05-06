@@ -60,8 +60,6 @@ const First = ({ selectedTable, selectedDocument }) => {
         };
       })[0];
 
-      console.log(tableData);
-
       setRating(tableData.rating || 0);
       setExtractedTableData(tableData);
       setInitialTableData(structuredClone(tableData) as TableData);
@@ -163,18 +161,14 @@ const First = ({ selectedTable, selectedDocument }) => {
 
   const revertToOriginal = () => {
     setExtractedTableData(structuredClone(initialTableData));
+    setCountChangesMadeInTableData(0);
   }
 
   const handleAddRow = () => {
     setExtractedTableData((prevTableData) => {
       if (prevTableData) {
         const newEmptyRow = {};
-        prevTableData.columns.forEach((col) => ({
-          ...newEmptyRow,
-          [col.key]: ""
-        }));
-
-        console.log(newEmptyRow);
+        prevTableData.columns.forEach((col) => newEmptyRow[col.key] = "");
 
         return {
           ...prevTableData,
@@ -183,6 +177,7 @@ const First = ({ selectedTable, selectedDocument }) => {
       }
       return prevTableData;
     });
+    setCountChangesMadeInTableData(prev => prev + 1);
   };
 
   // const handleDeleteRow = (index: number) => {
@@ -212,7 +207,9 @@ const First = ({ selectedTable, selectedDocument }) => {
                 data={extractedTableData.rows}
                 columns={extractedTableData.columns}
                 truncateLength={50}
-                onChange={(count) => setCountChangesMadeInTableData(count)} />
+                editedCells={countChangesMadeInTableData}
+                onChange={(count) => setCountChangesMadeInTableData(count)}
+              />
             </div>
           </>
         )}

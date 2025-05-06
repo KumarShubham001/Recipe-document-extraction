@@ -10,15 +10,12 @@ interface TableProps<T> {
   editable?: boolean;
   truncateLength?: number;
   onChange?: (count: number) => void;
+  editedCells?: number;
 }
 
-const Table = <T,>({ data, columns, editable, onChange, truncateLength = 50 }: TableProps<T>) => {
+const Table = <T,>({ data, columns, editable, onChange, editedCells, truncateLength = 50 }: TableProps<T>) => {
   const [changedCellKeys, setChangedCellKeys] = useState<Set<string>>(new Set());
   const [originalData, setOriginalData] = useState<any>(structuredClone(data));
-
-  useEffect(() => {
-    console.log(data);
-  }, [data])
 
   const truncateText = (text: string | number, length: number) => {
     const stringText = String(text);
@@ -36,13 +33,10 @@ const Table = <T,>({ data, columns, editable, onChange, truncateLength = 50 }: T
       e.currentTarget.style.whiteSpace = 'normal'; // Reset white-space on blur
       e.currentTarget.textContent = truncateText(newValue, truncateLength);
       e.currentTarget.title = newValue;
-
-      console.log('data: ' + data[parseInt(e.currentTarget.dataset.index!)][e.currentTarget.dataset.key! as keyof T]);
-      console.log('originalData: ' + originalData[parseInt(e.currentTarget.dataset.index!)][e.currentTarget.dataset.key! as keyof T]);
     }
 
     // track the change made in the cell
-    if (editable && String(originalData[parseInt(e.currentTarget.dataset.index!)][e.currentTarget.dataset.key! as keyof T]) !== newValue) {
+    if (editable && originalData[parseInt(e.currentTarget.dataset.index!)] && String(originalData[parseInt(e.currentTarget.dataset.index!)][e.currentTarget.dataset.key! as keyof T]) && String(originalData[parseInt(e.currentTarget.dataset.index!)][e.currentTarget.dataset.key! as keyof T]) !== newValue) {
       const cellKey = `${e.currentTarget.dataset.index}-${e.currentTarget.dataset.key}`;
       if (!changedCellKeys.has(cellKey)) {
         setChangedCellKeys(prev => new Set(prev).add(cellKey));
@@ -54,6 +48,13 @@ const Table = <T,>({ data, columns, editable, onChange, truncateLength = 50 }: T
   useEffect(() => {
     onChange && onChange([...changedCellKeys].length);
   }, [changedCellKeys]);
+
+  // reset the changed cells when editedCells is reset
+  useEffect(() => {
+    if (!editedCells) {
+      setChangedCellKeys(new Set());
+    }
+  }, [editedCells])
 
   const handleFocus = (e: React.FocusEvent<HTMLTableCellElement>) => {
     if (editable) {
@@ -90,7 +91,8 @@ const Table = <T,>({ data, columns, editable, onChange, truncateLength = 50 }: T
                   key={column.key}
                   data-key={column.key}
                   data-index={index}
-                  className={styles["border"]}
+                  className={`${styles["border"]} ${changedCellKeys.has(`${index}-${column.key}`) ? styles.modified : ''}`}
+
                   contentEditable={editable}
                   suppressContentEditableWarning={true}
                   onFocus={handleFocus}
