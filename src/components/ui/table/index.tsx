@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styles from "./index.module.css";
 
 interface TableProps<T> {
@@ -8,32 +8,62 @@ interface TableProps<T> {
     header: string;
   }[];
   editable?: boolean;
+  truncateLength?: number;
+  onChange?: (count: number) => void;
 }
 
-const Table = <T,>({ data, columns, editable }: TableProps<T>) => {
-  const tableRows = useMemo(() => {
-    return data.map((row, index) => (
-      <tr
-        key={index}
-        className={index % 2 === 0 ? styles["bg-dark"] : styles["bg-light"]}
-      >
-        {columns.map((column) => (
-          <td
-            key={column.key}
-            className={styles["border"]}
-            contentEditable = {editable}
-            suppressContentEditableWarning={true}
-            onBlur={(e) => {
-              const newValue = e.currentTarget.textContent || "";
-              row[column.key] = newValue;
-            }}
-          >
-            {row[column.key]}
-          </td>
-        ))}
-      </tr>
-    ));
-  }, [data, columns]);
+const Table = <T,>({ data, columns, editable, onChange, truncateLength = 50 }: TableProps<T>) => {
+  const [changedCellKeys, setChangedCellKeys] = useState<Set<string>>(new Set());
+  const [originalData, setOriginalData] = useState<any>(structuredClone(data));
+
+  useEffect(() => {
+    console.log(data);
+  }, [data])
+
+  const truncateText = (text: string | number, length: number) => {
+    const stringText = String(text);
+    if (stringText.length > length) {
+      return stringText.substring(0, length) + "...";
+    }
+    return stringText;
+  }
+
+  const handleBlur = (e: React.FocusEvent<HTMLTableCellElement>, row: T, column: { key: string; header: string }) => {
+    // format the data
+    const newValue = e.currentTarget.textContent || '';
+    (row[column.key as keyof T] as any) = newValue;
+    if (editable) {
+      e.currentTarget.style.whiteSpace = 'normal'; // Reset white-space on blur
+      e.currentTarget.textContent = truncateText(newValue, truncateLength);
+      e.currentTarget.title = newValue;
+
+      console.log('data: ' + data[parseInt(e.currentTarget.dataset.index!)][e.currentTarget.dataset.key! as keyof T]);
+      console.log('originalData: ' + originalData[parseInt(e.currentTarget.dataset.index!)][e.currentTarget.dataset.key! as keyof T]);
+    }
+
+    // track the change made in the cell
+    if (editable && String(originalData[parseInt(e.currentTarget.dataset.index!)][e.currentTarget.dataset.key! as keyof T]) !== newValue) {
+      const cellKey = `${e.currentTarget.dataset.index}-${e.currentTarget.dataset.key}`;
+      if (!changedCellKeys.has(cellKey)) {
+        setChangedCellKeys(prev => new Set(prev).add(cellKey));
+      }
+    }
+  }
+
+  // emit the change
+  useEffect(() => {
+    onChange && onChange([...changedCellKeys].length);
+  }, [changedCellKeys]);
+
+  const handleFocus = (e: React.FocusEvent<HTMLTableCellElement>) => {
+    if (editable) {
+      e.currentTarget.style.whiteSpace = 'normal';
+      e.currentTarget.textContent = String(e.currentTarget.textContent).replace(/…$/, '');
+      e.currentTarget.title = '';
+      e.currentTarget.focus();
+      e.currentTarget.textContent = String(data[parseInt(e.currentTarget.dataset.index!)][e.currentTarget.dataset.key! as keyof T]);
+    }
+  };
 
   return (
     <table
@@ -48,7 +78,33 @@ const Table = <T,>({ data, columns, editable }: TableProps<T>) => {
           ))}
         </tr>
       </thead>
-      <tbody>{tableRows}</tbody>
+      <tbody>
+        {
+          data.map((row, index) => (
+            <tr
+              key={index}
+              className={index % 2 === 0 ? styles["bg-dark"] : styles["bg-light"]}
+            >
+              {columns.map((column) => (
+                <td
+                  key={column.key}
+                  data-key={column.key}
+                  data-index={index}
+                  className={styles["border"]}
+                  contentEditable={editable}
+                  suppressContentEditableWarning={true}
+                  onFocus={handleFocus}
+                  onBlur={(event) => handleBlur(event as React.FocusEvent<HTMLTableCellElement>, row, column)}
+                  title={String(row[column.key as keyof T])}
+                >
+                  {!row[column.key as keyof T] && ""}
+                  {row[column.key as keyof T] && !editable || (editable && typeof document !== 'undefined' && document.activeElement !== document.querySelector(`[data-index="${index}"][data-key="${column.key}"]`)) ? truncateText(String(row[column.key as keyof T]), truncateLength) : String(row[column.key as keyof T])}
+                </td>
+              ))}
+            </tr>
+          ))
+        }
+      </tbody>
     </table>
   );
 };

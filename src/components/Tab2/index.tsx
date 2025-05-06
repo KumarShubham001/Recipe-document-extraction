@@ -92,8 +92,8 @@ const Tab2: React.FC = () => {
       const docOptions: Option[] = documents.map((item) => ({
         value: item.document_id,
         label:
-          item.document_name.charAt(0).toUpperCase() +
-          item.document_name.slice(1),
+          item.document_id.charAt(0).toUpperCase() +
+          item.document_id.slice(1),
       }));
       setDocumentOptions(docOptions);
     };

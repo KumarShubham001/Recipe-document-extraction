@@ -77,8 +77,8 @@ const Status = () => {
       return {
         value: item.document_id,
         label:
-          item.document_name.charAt(0).toUpperCase() +
-          item.document_name.slice(1),
+          item.document_id.charAt(0).toUpperCase() +
+          item.document_id.slice(1),
       };
     });
     setPreviousUploadList(docIds);

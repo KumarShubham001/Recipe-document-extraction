@@ -30,11 +30,10 @@ interface TableData {
 const First = ({ selectedTable, selectedDocument }) => {
   const navigate = useNavigate();
   const { setDocumentId, setIsLoading } = useDocument();
-  const [extractedTable, setExtractedTable] = useState<TableData | undefined>(undefined);
-  const [extractedTableOg, setExtractedTableOg] = useState<any | undefined>(undefined);
+  const [extractedTableData, setExtractedTableData] = useState<TableData | undefined>(undefined);
+  const [initialTableData, setInitialTableData] = useState<TableData | undefined>(undefined);
   const [rating, setRating] = useState<number>(0);
-
-  let extractedtabledata:TableData | undefined = undefined;
+  const [countChangesMadeInTableData, setCountChangesMadeInTableData] = useState<number>(0);
 
   const formatData = (extracted_tables) => {
     const selectedTableData = extracted_tables.filter(table => table.table_name === selectedTable);
@@ -64,9 +63,8 @@ const First = ({ selectedTable, selectedDocument }) => {
       console.log(tableData);
 
       setRating(tableData.rating || 0);
-      setExtractedTable({...tableData});
-      setExtractedTableOg({...tableData});
-      extractedtabledata = {...tableData};
+      setExtractedTableData(tableData);
+      setInitialTableData(structuredClone(tableData) as TableData);
     }
   }
 
@@ -127,9 +125,7 @@ const First = ({ selectedTable, selectedDocument }) => {
         ],
       };
 
-      setExtractedTableOg(extracted_tables);
       formatData(extracted_tables);
-      
       setIsLoading(false);
     }
 
@@ -155,31 +151,30 @@ const First = ({ selectedTable, selectedDocument }) => {
     const data = {
       document_id: selectedDocument,
       table_name: selectedTable,
-      validated_outputs: [
-        {
-          attribute: "Recipe ID",
-          extraction_output: "DOC-12345",
-          manual_override: "",
-        },
-      ],
+      validated_outputs: extractedTableData?.rows,
     };
+    console.log(data);
     // const response = await saveValidatedOutputs(data);
     // console.log("response", response);
 
-    setDocumentId(selectedDocument);
-    navigate("/app/output");
+    // setDocumentId(selectedDocument);
+    // navigate("/app/output");
   };
 
   const revertToOriginal = () => {
-    formatData(extractedTableOg);
+    setExtractedTableData(structuredClone(initialTableData));
   }
 
   const handleAddRow = () => {
-    setExtractedTable((prevTableData) => {
+    setExtractedTableData((prevTableData) => {
       if (prevTableData) {
-        const newEmptyRow = prevTableData.columns.map((col) => ({
+        const newEmptyRow = {};
+        prevTableData.columns.forEach((col) => ({
+          ...newEmptyRow,
           [col.key]: ""
         }));
+
+        console.log(newEmptyRow);
 
         return {
           ...prevTableData,
@@ -199,34 +194,38 @@ const First = ({ selectedTable, selectedDocument }) => {
       <h4 className={styles.tabTitle}>Extracted Outputs</h4>
 
       <div className={styles['table-container']}>
-      {extractedTable && (
-        <>
-          <div className={styles["button-group-inline"]}>
-            <StarRating rating={rating} setRating={(newRating) => setRating(newRating)} />
-            <Feedback title="Feedback" onSaveFeedback={saveFeedback} />
-          </div>
-          <div>
-            <div className={styles["button-group"]}>
-              <Button onClick={handleAddRow}>Add Row</Button>
-              <Button onClick={revertToOriginal}>
-                Revert to AI generate outputs
-              </Button>
+        {extractedTableData && (
+          <>
+            <div className={styles["button-group-inline"]}>
+              <StarRating rating={rating} setRating={(newRating) => setRating(newRating)} />
+              <Feedback title="Feedback" onSaveFeedback={saveFeedback} />
             </div>
-            <Table editable={true} data={extractedTable.rows} columns={extractedTable.columns} />
-          </div>
-        </>
-      )}
-      
-      {!extractedTable && <p className="text-center">No extracted outputs found. Please select different table for the selected document.</p>}
+            <div>
+              <div className={styles["button-group"]}>
+                <Button onClick={handleAddRow}>Add Row</Button>
+                <Button onClick={revertToOriginal}>
+                  Revert to AI generate outputs
+                </Button>
+              </div>
+              <Table
+                editable={true}
+                data={extractedTableData.rows}
+                columns={extractedTableData.columns}
+                truncateLength={50}
+                onChange={(count) => setCountChangesMadeInTableData(count)} />
+            </div>
+          </>
+        )}
+
+        {!extractedTableData && <p className="text-center">No extracted outputs found. Please select different table for the selected document.</p>}
       </div>
 
       <Button
         onClick={digitizeRecipe}
         className="full-width"
-        disabled={!extractedTable}
+        disabled={!extractedTableData}
       >
-        {/* 1 Change made, Digitize Recipe? */}
-        Digitize Recipe
+        {countChangesMadeInTableData === 0 ? 'Digitize Recipe?' : countChangesMadeInTableData + ' Changes made, Digitize Recipe?'}
       </Button>
     </section>
   );
