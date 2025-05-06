@@ -160,7 +160,12 @@ const First = ({ selectedTable, selectedDocument }) => {
   };
 
   const revertToOriginal = () => {
-    setExtractedTableData(structuredClone(initialTableData));
+    // reset the table data to the original data
+    setExtractedTableData(undefined);
+
+    setTimeout(() => {
+      setExtractedTableData(structuredClone(initialTableData));
+    })
     setCountChangesMadeInTableData(0);
   }
 
@@ -180,10 +185,6 @@ const First = ({ selectedTable, selectedDocument }) => {
     setCountChangesMadeInTableData(prev => prev + 1);
   };
 
-  // const handleDeleteRow = (index: number) => {
-  //   setExtractedTable((prev) => prev.filter((_, i) => i !== index));
-  // };
-
   return (
     <section className={styles.main}>
       <h4 className={styles.tabTitle}>Extracted Outputs</h4>
@@ -197,7 +198,11 @@ const First = ({ selectedTable, selectedDocument }) => {
             </div>
             <div>
               <div className={styles["button-group"]}>
-                <Button onClick={handleAddRow}>Add Row</Button>
+                <Button onClick={handleAddRow}>
+                  {/* <Button onClick={handleAddRow} className="icon-button"> */}
+                  {/* <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 448 512" height="15px" width="15px" xmlns="http://www.w3.org/2000/svg"><path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"></path></svg> */}
+                  Add Row
+                </Button>
                 <Button onClick={revertToOriginal}>
                   Revert to AI generate outputs
                 </Button>
@@ -208,7 +213,11 @@ const First = ({ selectedTable, selectedDocument }) => {
                 columns={extractedTableData.columns}
                 truncateLength={50}
                 editedCells={countChangesMadeInTableData}
-                onChange={(count) => setCountChangesMadeInTableData(count)}
+                onChange={(data, count) => {
+                  setExtractedTableData({ ...extractedTableData, rows: data })
+                  setCountChangesMadeInTableData(count)
+                }}
+              // onUpdate={updatedRowValue}
               />
             </div>
           </>

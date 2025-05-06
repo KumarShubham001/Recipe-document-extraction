@@ -27,6 +27,16 @@
     border: none;
   }
 
+  &.icon-buton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:not(:last-child) {
+      margin-right: 5px;
+    }
+  }
+
   &:disabled {
     cursor: not-allowed;
   }
