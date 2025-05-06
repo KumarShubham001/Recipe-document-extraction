@@ -5,7 +5,7 @@ import Second from "./section2/index";
 import Third from "./section3/index";
 
 import Select from "../ui/select";
-import { getExtractedTables, getPreviousUploads } from "../../api";
+import { getExtractedOutputs, getExtractedTables, getPreviousUploads } from "../../api";
 import { useDocument } from "../../context/DocumentContext";
 
 interface Option {
@@ -13,68 +13,16 @@ interface Option {
   label: string;
 }
 
-interface DocumentData {
-  documentId: string;
-  documentName: string;
-  uploadedOn: string;
-  uploadedBy: string;
-  validated: string;
+interface ExtractedOutput {
+  "table_name": string,
+  "columns": string[],
+  "rows": any[]
 }
 
-const dropdown2: Option[] = [
-  {
-    value: "recipe",
-    label: "Recipe",
-  },
-  {
-    value: "monitoring-points",
-    label: "Monitoring Points",
-  },
-  {
-    value: "unit_operations",
-    label: "Unit Operations",
-  },
-  {
-    value: "activity",
-    label: "Activity",
-  },
-  {
-    value: "parameters",
-    label: "Parameters",
-  },
-  {
-    value: "material",
-    label: "Material",
-  },
-  {
-    value: "unit_operation_material",
-    label: "Unit Operation Material",
-  },
-  {
-    value: "sampling_point",
-    label: "Sampling Point",
-  },
-  {
-    value: "equipment_master",
-    label: "Equipment Master",
-  },
-  {
-    value: "unit_operation_equipment",
-    label: "Unit Operation Equipment",
-  },
-  {
-    value: "parameters_general",
-    label: "Parameters General",
-  },
-  {
-    value: "unit_operation_comment",
-    label: "Unit Operation Comment",
-  },
-];
-
 const Tab2: React.FC = () => {
-  const { documentId } = useDocument();
+  const { documentId, setIsLoading } = useDocument();
   const [selectedAttribute, setSelectedAttribute] = useState<string>("")
+  const [extractedOutputs, setExtractedOutputs] = useState<ExtractedOutput | undefined>(undefined)
   const [tableOptions, setTableOptions] = useState<Option[]>([]);
   const [selectedTable, setSelectedTable] = useState<
     string | undefined
@@ -86,6 +34,8 @@ const Tab2: React.FC = () => {
 
   useEffect(() => {
     const _init = async () => {
+      setIsLoading(true);
+
       // use the fetch API call to get the previous upload list
       const { documents } = await getPreviousUploads();
 
@@ -96,11 +46,14 @@ const Tab2: React.FC = () => {
           item.document_id.slice(1),
       }));
       setDocumentOptions(docOptions);
+      setIsLoading(false);
     };
+
     _init();
   }, []);
 
   const fetchExtractedTables = async (selectedDocument) => {
+    setIsLoading(true);
     const { table_names } = await getExtractedTables(selectedDocument);
     const tableOptions = table_names.map(table => ({
       value: table,
@@ -110,7 +63,21 @@ const Tab2: React.FC = () => {
     }));
     setTableOptions(tableOptions);
     setSelectedTable(tableOptions[0].value);
+    setIsLoading(false);
   };
+
+  const fetchExtractedOutputs = async (selectedDocument, selectedTable) => {
+    setIsLoading(true);
+    const extractedOutputs = await getExtractedOutputs(selectedDocument, selectedTable);
+    setExtractedOutputs(extractedOutputs);
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    if (documentId) {
+      setSelectedDocument(documentId)
+    }
+  }, [documentId])
 
   useEffect(() => {
     if (selectedDocument) {
@@ -119,10 +86,10 @@ const Tab2: React.FC = () => {
   }, [selectedDocument]);
 
   useEffect(() => {
-    if (documentId) {
-      setSelectedDocument(documentId)
+    if (selectedDocument && selectedTable) {
+      fetchExtractedOutputs(selectedDocument, selectedTable)
     }
-  }, [documentId])
+  }, [selectedDocument, selectedTable])
 
   return (
     <>
@@ -147,12 +114,17 @@ const Tab2: React.FC = () => {
         </div>
       </div>
       <div className="tab-container">
-        <First selectedTable={selectedTable} selectedDocument={selectedDocument} />
+        <First
+          selectedTable={selectedTable}
+          selectedDocument={selectedDocument}
+          extractedOutputs={extractedOutputs}
+        />
         <section>
           <Second
             selectedTable={selectedTable}
             selectedDocument={selectedDocument}
             selectedAttribute={selectedAttribute}
+            extractedOutputs={extractedOutputs}
             onAttriChange={setSelectedAttribute}
           />
           <Third selectedDocument={selectedDocument} selectedAttribute={selectedAttribute} />
