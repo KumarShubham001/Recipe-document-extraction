@@ -75,7 +75,7 @@ const Second = ({ selectedDocument, selectedTable, selectedAttribute, onAttriCha
 
               </div>
               <p>
-                {pageDetails.page_link && <a href={pageDetails.page_link}>Go to Page in document</a>}
+                {pageDetails.page_link && <a target='_blank' href={pageDetails.page_link}>Go to Page in document</a>}
               </p>
             </div>
           </>}

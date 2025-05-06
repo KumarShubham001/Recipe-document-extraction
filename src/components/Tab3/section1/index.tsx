@@ -131,9 +131,8 @@ const tableList = [
   }
 ]
 
-const Status = () => {
-  const { documentId, setIsLoading } = useDocument();
-  const [currDocid, setCurrDocId] = useState(documentId);
+const Status = ({ selectedDoc }) => {
+  const { setIsLoading } = useDocument();
   const [validatedTables, setValidatedTables] = useState<any>([])
 
   const fetchValidatedTables = async (docId) => {
@@ -142,8 +141,10 @@ const Status = () => {
       const data = {
         "document_id": docId
       }
-      // let res = await getValidatedOutputTables(data);
-      const {validated_tables} = {
+
+      // const { validated_tables } = await getValidatedOutputTables(data);
+
+      const { validated_tables } = {
         "validated_tables": [
           {
             "table_name": "Recipe table",
@@ -181,8 +182,9 @@ const Status = () => {
           return data;
         });
 
-        return {columns: cols, rows: rows, table_name: table.table_name}
+        return { columns: cols, rows: rows, table_name: table.table_name }
       })
+      
       console.log(tableData)
       setValidatedTables(tableData);
     }
@@ -195,14 +197,10 @@ const Status = () => {
   }
 
   useEffect(() => {
-    if (currDocid) {
-      fetchValidatedTables(currDocid);
+    if (selectedDoc) {
+      fetchValidatedTables(selectedDoc);
     }
-  }, [currDocid])
-
-  useEffect(() => {
-    setCurrDocId(documentId)
-  }, [documentId])
+  }, [selectedDoc])
 
   return (
     <section className={styles.main} style={{ width: '100%' }}>
@@ -210,34 +208,21 @@ const Status = () => {
         Extracted Outputs (After validation)
       </h4>
 
-      {/* <div className=''>
-        <p className={styles.previousUploadTitle}>
-          Recipe table:
-        </p>
-        <div>
-          <Table data={documentData1} columns={tableColumns1} />
-        </div>
-      </div>
-
-      <div className=''>
-        <p className={styles.previousUploadTitle}>
-          Unit operation table:
-        </p>
-        <div>
-          <Table data={documentData2} columns={tableColumns2} />
-        </div>
-      </div> */}
-
-      {validatedTables.map((table, index) => (
-        <div className='' key={index}>
-          <p className={styles.previousUploadTitle}>
-            {table.table_name}
-          </p>
-          <div>
-            <Table data={table.rows} columns={table.columns} />
+      <div className={styles['table-container']}>
+        {validatedTables.length > 0 && validatedTables.map((table, index) => (
+          <div className='' key={index}>
+            <p className={styles.previousUploadTitle}>
+            <b>{table.table_name} :</b>
+            </p>
+            <div>
+              <Table data={table.rows} columns={table.columns} />
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+        {validatedTables.length === 0 && <p className="text-center">
+          Please select a document from the drop-down to view the extracted and validated outputs.
+        </p>}
+      </div>
 
 
     </section>

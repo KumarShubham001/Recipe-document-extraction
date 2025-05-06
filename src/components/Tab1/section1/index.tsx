@@ -14,6 +14,7 @@ import Button from "../../ui/button";
 import Dropzone from "../../ui/dropzone";
 import Table from "../../ui/table";
 import Select from "../../ui/select";
+import Toast from "../../ui/toast";
 
 // styles
 import styles from "./style.module.css";
@@ -48,15 +49,19 @@ const Status = () => {
   const { username } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>();
   const dropzoneRef = React.useRef<{ clearFile: () => void } | null>(null);
+
   // for dropdown
   const [previousUploadList, setPreviousUploadList] = useState<Option[]>([]);
+
   // curr selected dropdown
   const [selectedFileIdFromPrevList, setSelectedFileIdFromPrevList] = useState<
     string | undefined
   >(undefined);
+
   // to show in the table
   const [previousUploadsTable, setPreviousUploadsTable] = useState<
     DocumentData[]
+
   >([]);
 
   const updatepreviousuploadlist = (docList) => {
@@ -113,7 +118,7 @@ const Status = () => {
             file: selectedFile,
             username: username,
           });
-          
+
           if (uploadResponse.uploaded_file) {
             setDocumentId(uploadResponse.uploaded_file.file_id);
           }
@@ -128,7 +133,6 @@ const Status = () => {
             )?.document_name,
             submitted_by: username,
           });
-
           setDocumentId(String(submitDocumentResponse.document_id));
         }
 

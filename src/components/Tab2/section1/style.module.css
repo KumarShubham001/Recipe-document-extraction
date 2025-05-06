@@ -15,3 +15,23 @@
   text-decoration: underline;
 }
 
+.button-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.button-group-inline {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 15px;
+}
+
+.table-container {
+  min-height: 300px;
+  max-height: 400px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}

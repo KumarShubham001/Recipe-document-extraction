@@ -51,7 +51,8 @@ const Tab3: React.FC = () => {
     try {
       setIsLoading(true);
       const data = {
-        "document_id": selectedDoc
+        "document_id": selectedDoc,
+        
       }
       const res = await downloadValidatedOutputTables(data);
       console.log(res);
@@ -75,11 +76,11 @@ const Tab3: React.FC = () => {
           />
         </div>
         <div className='form-element'>
-          <Button onClick={downloadValidatedTables}>Download Tables</Button>
+          <Button disabled={!selectedDoc} onClick={downloadValidatedTables}>Download Tables</Button>
         </div>
       </div>
       <div className='tab-container'>
-        <First />
+        <First selectedDoc={selectedDoc} />
       </div>
     </>
   );

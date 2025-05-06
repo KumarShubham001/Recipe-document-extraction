@@ -13,3 +13,9 @@
 .previousUploadTitle {
     text-decoration: underline;
 }
+
+.table-container {
+    min-height: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+}

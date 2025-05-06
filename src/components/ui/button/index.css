@@ -21,8 +21,13 @@
   &.active {
     background: #dbeafe;
   }
+
   &.icon-btn {
     background: none;
     border: none;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
   }
 }

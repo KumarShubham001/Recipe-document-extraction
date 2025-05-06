@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  getExtractedOutputs,
-  saveValidatedOutputs
-} from "./../../../api";
+import { getExtractedOutputs, saveValidatedOutputs } from "./../../../api";
 import Button from "../../ui/button";
 import { useDocument } from "../../../context/DocumentContext";
-import { ColumnDef, getEditableRowData } from "../../ui/editableTableRow";
 import StarRating from "../../ui/starRating";
+import Feedback from "../../ui/feedback";
 import Table from "../../ui/table";
 
 import styles from "./style.module.css";
@@ -18,55 +15,141 @@ interface DocumentData {
   manualOverride: string;
 }
 
-// const documentData: DocumentData[] = [
-//   { attribute: "Recipe ID", extractedOutput: "DOC-12345", manualOverride: "-" },
-//   { attribute: "Recipe Title", extractedOutput: "-", manualOverride: "-" },
-// ];
+interface Col {
+  key: string;
+  header: string;
+}
 
-const attributeOptions = ["Recipe ID", "Recipe Title"];
-
-const tableColumns: ColumnDef[] = [
-  // {
-  //   key: "attribute",
-  //   header: "Attribute",
-  //   type: "select",
-  //   options: attributeOptions,
-  // },
-  { key: "recipeId", header: "Recipe ID", type: "input" },
-  { key: "recipeTitle", header: "Recipe Title", type: "input" },
-  { key: "recipeVersion", header: "Recipe Version", type: "input" },
-  { key: "recipeType", header: "Recipe Type", type: "input" },
-  { key: "product", header: "Product", type: "input" },
-  { key: "statusOfTheRecipe", header: "Status of the Recipe", type: "input" },
-  { key: "description", header: "Description", type: "input" },
-  { key: "approvedDate", header: "Approved Date", type: "input" },
-];
+interface TableData {
+  columns: Col[],
+  rows: any[],
+  table_name: string,
+  rating: number,
+}
 
 const First = ({ selectedTable, selectedDocument }) => {
   const navigate = useNavigate();
-  const { setIsLoading } = useDocument();
-  const [documentData, setDocumentData] = useState<DocumentData[]>([]);
+  const { setDocumentId, setIsLoading } = useDocument();
+  const [extractedTable, setExtractedTable] = useState<TableData | undefined>(undefined);
+  const [extractedTableOg, setExtractedTableOg] = useState<any | undefined>(undefined);
   const [rating, setRating] = useState<number>(0);
+
+  let extractedtabledata:TableData | undefined = undefined;
+
+  const formatData = (extracted_tables) => {
+    const selectedTableData = extracted_tables.filter(table => table.table_name === selectedTable);
+    if (selectedTableData.length > 0) {
+      const tableData: TableData = selectedTableData.map((table) => {
+        const cols = table.columns.map((e) => ({
+          key: String(e).trim(),
+          header: String(e).trim(),
+        }));
+
+        const rows = table.rows.map((row) => {
+          const data = {};
+          cols.forEach((col, index) => {
+            data[col.key] = row[index];
+          });
+          return data;
+        });
+
+        return {
+          columns: cols,
+          rows: rows,
+          table_name: table.table_name,
+          rating: table.rating,
+        };
+      })[0];
+
+      console.log(tableData);
+
+      setRating(tableData.rating || 0);
+      setExtractedTable({...tableData});
+      setExtractedTableOg({...tableData});
+      extractedtabledata = {...tableData};
+    }
+  }
 
   useEffect(() => {
     async function fetchData() {
       const { outputs } = await getExtractedOutputs(selectedDocument, selectedTable);
       console.log(outputs)
-      setDocumentData(outputs);
+      const { extracted_tables } = {
+        extracted_tables: [
+          {
+            table_name: "Table 1",
+            columns: [
+              "Recipe ID",
+              "Recipe Title",
+              "Recipe Version",
+              "Recipe Type",
+              "Product",
+              "Description",
+              "Approved Date",
+            ],
+            rows: [
+              [
+                "Doc-12345",
+                "Generic Biologics Example Site Specific Downstream Process Description",
+                "1",
+                "Site Specific Downstream Process Description",
+                "Generic Biologic",
+                "This document describes the drug substance manufacturing (Indicate is molecule is Drug Substance or a mAb Intermediate) operations for Generic Biologics from protein A chromatography through drug substance storage for the Pharma Biologics manufacturing facility. The downstream manufacturing process concludes at the transfer of drug substance from the initial -80°C freeze to drug substance storage at -30°C",
+                "05 March 2025",
+              ],
+            ],
+            rating: 4,
+          },
+          {
+            table_name: "Table 2",
+            columns: [
+              "DOCUMENT_ID",
+              "DOCUMENT_NAME",
+              "VERSION",
+              "DOCUMENT_TYPE",
+              "PRODUCT",
+              "DESCRIPTION",
+              "APPROVED_DATE",
+            ],
+            rows: [
+              [
+                "Doc-12345",
+                "Generic Biologics Example Site Specific Downstream Process Description",
+                "1",
+                "Site Specific Downstream Process Description",
+                "Generic Biologic",
+                "This document describes the drug substance manufacturing (Indicate is molecule is Drug Substance or a mAb Intermediate) operations for Generic Biologics from protein A chromatography through drug substance storage for the Pharma Biologics manufacturing facility. The downstream manufacturing process concludes at the transfer of drug substance from the initial -80°C freeze to drug substance storage at -30°C",
+                "03 March 2025",
+              ],
+            ],
+            rating: 3,
+          },
+        ],
+      };
+
+      setExtractedTableOg(extracted_tables);
+      formatData(extracted_tables);
+      
       setIsLoading(false);
     }
 
     if (selectedDocument && selectedTable) {
-      setIsLoading(true)
+      setIsLoading(true);
       fetchData();
     }
   }, [selectedDocument, selectedTable]);
 
   useEffect(() => {
-    if(rating) {
+    if (rating) {
       // update rating API here
+      console.log('ratings updated', rating);
     }
-  }, [rating])
+  }, [rating]);
+
+  const saveFeedback = (feedback) => {
+    // save feedback API here
+    console.log("Saving feedback: " + feedback);
+  };
 
   const digitizeRecipe = async () => {
     const data = {
@@ -82,120 +165,66 @@ const First = ({ selectedTable, selectedDocument }) => {
     };
     // const response = await saveValidatedOutputs(data);
     // console.log("response", response);
+
+    setDocumentId(selectedDocument);
     navigate("/app/output");
   };
 
+  const revertToOriginal = () => {
+    formatData(extractedTableOg);
+  }
+
   const handleAddRow = () => {
-    setDocumentData((prev) => [
-      ...prev,
-      { attribute: "", extractedOutput: "", manualOverride: "" },
-    ]);
+    setExtractedTable((prevTableData) => {
+      if (prevTableData) {
+        const newEmptyRow = prevTableData.columns.map((col) => ({
+          [col.key]: ""
+        }));
+
+        return {
+          ...prevTableData,
+          rows: [...prevTableData.rows, newEmptyRow],
+        };
+      }
+      return prevTableData;
+    });
   };
 
-  const updateRowField = (
-    index: number,
-    key: keyof DocumentData,
-    value: string
-  ) => {
-    const updated = [...documentData];
-    updated[index][key] = value;
-    setDocumentData(updated);
-  };
-  const handleDeleteRow = (index: number) => {
-    setDocumentData((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const renderData = getEditableRowData(
-    documentData,
-    tableColumns,
-    updateRowField,
-    (index) => (
-      <Button className="icon-btn" onClick={() => handleDeleteRow(index)}>
-        <svg
-          stroke="currentColor"
-          fill="none"
-          strokeWidth="0"
-          viewBox="0 0 15 15"
-          height="16px"
-          width="16px"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            fill-rule="evenodd"
-            clip-rule="evenodd"
-            d="M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z"
-            fill="currentColor"
-          ></path>
-        </svg>
-      </Button>
-    )
-  );
-  // const renderData = documentData.map((row, index) => ({
-  //   attribute: row.attribute ? (
-  //     row.attribute
-  //   ) : (
-  //     <select
-  //       value={row.attribute}
-  //       onChange={(e) => updateRowField(index, "attribute", e.target.value)}
-  //     >
-  //       <option value="">Select</option>
-  //       {attributeOptions?.map((opt) => (
-  //         <option key={opt} value={opt}>
-  //           {opt}
-  //         </option>
-  //       ))}
-  //     </select>
-  //   ),
-  //   extractedOutput: row.extractedOutput ? (
-  //     row.extractedOutput
-  //   ) : (
-  //     <input
-  //       defaultValue={row.extractedOutput}
-  //       // value={row.extractedOutput}
-  //       onBlur={(e) => updateRowField(index, "extractedOutput", e.target.value)}
-  //     />
-  //   ),
-  //   manualOverride: row.manualOverride ? (
-  //     row.manualOverride
-  //   ) : (
-  //     <input
-  //       defaultValue={row.manualOverride}
-  //       // value={row.manualOverride}
-  //       onBlur={(e) => updateRowField(index, "manualOverride", e.target.value)}
-  //     />
-  //   ),
-  //   actions: (
-  //     <Button className="icon-btn" onClick={() => handleDeleteRow(index)}>
-  //       <svg
-  //         stroke="currentColor"
-  //         fill="currentColor"
-  //         strokeWidth="0"
-  //         version="1.1"
-  //         viewBox="0 0 16 16"
-  //         height="16px"
-  //         width="16px"
-  //         xmlns="http://www.w3.org/2000/svg"
-  //       >
-  //         <path d="M15.854 12.854c-0-0-0-0-0-0l-4.854-4.854 4.854-4.854c0-0 0-0 0-0 0.052-0.052 0.090-0.113 0.114-0.178 0.066-0.178 0.028-0.386-0.114-0.529l-2.293-2.293c-0.143-0.143-0.351-0.181-0.529-0.114-0.065 0.024-0.126 0.062-0.178 0.114 0 0-0 0-0 0l-4.854 4.854-4.854-4.854c-0-0-0-0-0-0-0.052-0.052-0.113-0.090-0.178-0.114-0.178-0.066-0.386-0.029-0.529 0.114l-2.293 2.293c-0.143 0.143-0.181 0.351-0.114 0.529 0.024 0.065 0.062 0.126 0.114 0.178 0 0 0 0 0 0l4.854 4.854-4.854 4.854c-0 0-0 0-0 0-0.052 0.052-0.090 0.113-0.114 0.178-0.066 0.178-0.029 0.386 0.114 0.529l2.293 2.293c0.143 0.143 0.351 0.181 0.529 0.114 0.065-0.024 0.126-0.062 0.178-0.114 0-0 0-0 0-0l4.854-4.854 4.854 4.854c0 0 0 0 0 0 0.052 0.052 0.113 0.090 0.178 0.114 0.178 0.066 0.386 0.029 0.529-0.114l2.293-2.293c0.143-0.143 0.181-0.351 0.114-0.529-0.024-0.065-0.062-0.126-0.114-0.178z"></path>
-  //       </svg>
-  //     </Button>
-  //   ),
-  // }));
+  // const handleDeleteRow = (index: number) => {
+  //   setExtractedTable((prev) => prev.filter((_, i) => i !== index));
+  // };
 
   return (
     <section className={styles.main}>
       <h4 className={styles.tabTitle}>Extracted Outputs</h4>
-      <div className="form-element">
-        <StarRating rating={rating} setRating={e => setRating(e)} />
+
+      <div className={styles['table-container']}>
+      {extractedTable && (
+        <>
+          <div className={styles["button-group-inline"]}>
+            <StarRating rating={rating} setRating={(newRating) => setRating(newRating)} />
+            <Feedback title="Feedback" onSaveFeedback={saveFeedback} />
+          </div>
+          <div>
+            <div className={styles["button-group"]}>
+              <Button onClick={handleAddRow}>Add Row</Button>
+              <Button onClick={revertToOriginal}>
+                Revert to AI generate outputs
+              </Button>
+            </div>
+            <Table editable={true} data={extractedTable.rows} columns={extractedTable.columns} />
+          </div>
+        </>
+      )}
+      
+      {!extractedTable && <p className="text-center">No extracted outputs found. Please select different table for the selected document.</p>}
       </div>
 
-      {documentData && <div>
-          <Button onClick={handleAddRow}> + Add row </Button>
-          <Table data={documentData} columns={tableColumns} />
-        </div>
-      }
-
-      <Button onClick={digitizeRecipe} className="full-width" disabled={!documentData}>
+      <Button
+        onClick={digitizeRecipe}
+        className="full-width"
+        disabled={!extractedTable}
+      >
         {/* 1 Change made, Digitize Recipe? */}
         Digitize Recipe
       </Button>
