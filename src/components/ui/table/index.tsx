@@ -13,17 +13,17 @@ interface TableProps<T> {
   editedCells?: number;
 }
 
+const truncateText = (text: string | number, length: number) => {
+  const stringText = String(text);
+  if (stringText.length > length) {
+    return stringText.substring(0, length) + "...";
+  }
+  return stringText;
+}
+
 const Table = <T,>({ data, columns, editable, onChange, editedCells, truncateLength = 50 }: TableProps<T>) => {
   const [changedCellKeys, setChangedCellKeys] = useState<Set<string>>(new Set());
   const [originalData, setOriginalData] = useState<any>(structuredClone(data));
-
-  const truncateText = (text: string | number, length: number) => {
-    const stringText = String(text);
-    if (stringText.length > length) {
-      return stringText.substring(0, length) + "...";
-    }
-    return stringText;
-  }
 
   // emit the change
   useEffect(() => {
@@ -86,53 +86,55 @@ const Table = <T,>({ data, columns, editable, onChange, editedCells, truncateLen
   return (
     <>
       {data.length > 0 &&
-        <table
-          className={`${styles["table-auto"]} ${styles["w-full"]} ${styles["border-collapse"]} ${styles["border"]} ${styles["custom-table"]}`}
-        >
-          <thead>
-            <tr className={styles["bg-header"]}>
-              {columns.map((column) => (
-                <th key={column.key} className={`${styles["border"]}`}>
-                  {column.header}
-                </th>
-              ))}
-              {editable && <th className={`${styles["border"]}`}>Actions</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {
-              data.map((row, index) => (
-                <tr
-                  key={index}
-                  className={index % 2 === 0 ? styles["bg-dark"] : styles["bg-light"]}
-                >
-                  {columns.map((column) => (
-                    <td
-                      key={column.key}
-                      data-key={column.key}
-                      data-index={index}
-                      className={`${styles["border"]} ${changedCellKeys.has(`${index}-${column.key}`) ? styles.modified : ''}`}
+        <div className={styles['table-container']}>
+          <table
+            className={`${styles["table-auto"]} ${styles["w-full"]} ${styles["border-collapse"]} ${styles["border"]} ${styles["custom-table"]}`}
+          >
+            <thead>
+              <tr className={styles["bg-header"]}>
+                {columns.map((column) => (
+                  <th key={column.key} className={`${styles["border"]}`}>
+                    {column.header}
+                  </th>
+                ))}
+                {editable && <th className={`${styles["border"]}`}>Actions</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {
+                data.map((row, index) => (
+                  <tr
+                    key={index}
+                    className={index % 2 === 0 ? styles["bg-dark"] : styles["bg-light"]}
+                  >
+                    {columns.map((column) => (
+                      <td
+                        key={column.key}
+                        data-key={column.key}
+                        data-index={index}
+                        className={`${styles["border"]} ${changedCellKeys.has(`${index}-${column.key}`) ? styles.modified : ''}`}
 
-                      contentEditable={editable}
-                      suppressContentEditableWarning={true}
-                      onFocus={handleFocus}
-                      onBlur={(event) => handleBlur(event as React.FocusEvent<HTMLTableCellElement>, row, column)}
-                      title={String(row[column.key as keyof T])}
-                    >
-                      {!row[column.key as keyof T] && ""}
-                      {row[column.key as keyof T] && !editable || (editable && typeof document !== 'undefined' && document.activeElement !== document.querySelector(`[data-index="${index}"][data-key="${column.key}"]`)) ? truncateText(String(row[column.key as keyof T]), truncateLength) : String(row[column.key as keyof T])}
-                    </td>
-                  ))}
-                  {editable && <td className={`${styles["action-container"]} ${styles["border"]}`}>
-                    <a href="#" onClick={() => handleDeleteRow(index)}>
-                      <svg stroke="currentColor" fill="none" strokeWidth="0" viewBox="0 0 15 15" height="16px" width="16px" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z" fill="currentColor"></path></svg>
-                    </a>
-                  </td>}
-                </tr>
-              ))
-            }
-          </tbody>
-        </table>
+                        contentEditable={editable}
+                        suppressContentEditableWarning={true}
+                        onFocus={handleFocus}
+                        onBlur={(event) => handleBlur(event as React.FocusEvent<HTMLTableCellElement>)}
+                        title={String(row[column.key as keyof T])}
+                      >
+                        {!row[column.key as keyof T] && ""}
+                        {row[column.key as keyof T] && !editable || (editable && typeof document !== 'undefined' && document.activeElement !== document.querySelector(`[data-index="${index}"][data-key="${column.key}"]`)) ? truncateText(String(row[column.key as keyof T]), truncateLength) : String(row[column.key as keyof T])}
+                      </td>
+                    ))}
+                    {editable && <td className={`${styles["action-container"]} ${styles["border"]}`}>
+                      <a href="#" onClick={() => handleDeleteRow(index)}>
+                        <svg stroke="currentColor" fill="none" strokeWidth="0" viewBox="0 0 15 15" height="16px" width="16px" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z" fill="currentColor"></path></svg>
+                      </a>
+                    </td>}
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
       }
       {data.length === 0 && <p className="text-center">No table rows available</p>}
     </>

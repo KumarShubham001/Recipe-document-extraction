@@ -119,16 +119,16 @@ const Tab2: React.FC = () => {
           selectedDocument={selectedDocument}
           extractedOutputs={extractedOutputs}
         />
-        <section>
-          <Second
-            selectedTable={selectedTable}
-            selectedDocument={selectedDocument}
-            selectedAttribute={selectedAttribute}
-            extractedOutputs={extractedOutputs}
-            onAttriChange={setSelectedAttribute}
-          />
-          <Third selectedDocument={selectedDocument} selectedAttribute={selectedAttribute} />
-        </section>
+      </div>
+      <div className="tab-container">
+        <Second
+          selectedTable={selectedTable}
+          selectedDocument={selectedDocument}
+          selectedAttribute={selectedAttribute}
+          extractedOutputs={extractedOutputs}
+          onAttriChange={setSelectedAttribute}
+        />
+        <Third selectedDocument={selectedDocument} selectedAttribute={selectedAttribute} />
       </div>
     </>
   );

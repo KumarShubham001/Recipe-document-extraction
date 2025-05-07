@@ -202,7 +202,7 @@ const Status = () => {
         <Button
           disabled={!selectedFile && !selectedFileIdFromPrevList}
           type="button"
-          className="full-width"
+          className="full-width primary"
           onClick={submitClickHandler}
         >
           Submit

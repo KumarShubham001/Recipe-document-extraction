@@ -134,7 +134,7 @@ const Second: React.FC = () => {
             Please wait while we extract the data from the document.
           </p>}
         </div>
-        <Button disabled={!showExtractionLog} onClick={navigateToTab2} className="full-width">Continue to validation</Button>
+        <Button disabled={!showExtractionLog} onClick={navigateToTab2} className="full-width primary">Continue to validation</Button>
       </div>}
 
       {showIntro && <p>

@@ -1,13 +1,10 @@
-import React, { useEffect } from "react"
+import React from "react"
 import "./index.css"
 
 const Button = (props) => {
-    let classes = "custom-button";
-    classes += props.className ? ` ${props.className}` : "";
-
     return (
         <button
-            className={classes}
+            className={"custom-button" + (props.className ? ` ${props.className}` : "")}
             onClick={props.onClick}
             disabled={props.disabled}
             type={props.type}

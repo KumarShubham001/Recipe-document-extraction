@@ -114,7 +114,7 @@ const First = ({ selectedTable, selectedDocument, extractedOutputs }) => {
   };
 
   return (
-    <section className={styles.main}>
+    <section className={`${styles.main} full-width`} style={{ width: '100%' }}>
       <h4 className={styles.tabTitle}>Extracted Outputs</h4>
 
       <div className={styles['table-container']}>
@@ -126,9 +126,8 @@ const First = ({ selectedTable, selectedDocument, extractedOutputs }) => {
             </div>
             <div>
               <div className={styles["button-group"]}>
-                <Button onClick={handleAddRow}>
-                  {/* <Button onClick={handleAddRow} className="icon-button"> */}
-                  {/* <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 448 512" height="15px" width="15px" xmlns="http://www.w3.org/2000/svg"><path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"></path></svg> */}
+                <Button onClick={handleAddRow} className="icon-button">
+                  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 448 512" height="15px" width="15px" xmlns="http://www.w3.org/2000/svg"><path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"></path></svg>
                   Add Row
                 </Button>
                 <Button onClick={revertToOriginal}>
@@ -156,7 +155,7 @@ const First = ({ selectedTable, selectedDocument, extractedOutputs }) => {
 
       <Button
         onClick={digitizeRecipe}
-        className="full-width"
+        className="primary float-right"
         disabled={!extractedOutputs}
       >
         {countChangesMadeInTableData === 0 ? 'Digitize Recipe?' : countChangesMadeInTableData + ' Changes made, Digitize Recipe?'}

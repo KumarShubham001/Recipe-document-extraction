@@ -25,18 +25,20 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className={styles.loginContainer}>
-      <div className={styles.loginCard}>
-        <h5 className={styles.title}>Provide your username here:</h5>
+      <div className={`${styles.loginCard} card`}>
+        <h5 className={styles.title}>Please enter your details here:</h5>
         <div className={styles.inputContainer}>
           <Input
             type="text"
+            name="username"
             id="username"
             value={uname}
             onChange={handleUsernameChange}
             placeholder="Enter your username"
+            label="Username"
           />
         </div>
-        <Button disabled={!uname} className="full-width" onClick={handleLogin}>Login</Button>
+        <Button disabled={!uname} className="full-width primary" onClick={handleLogin}>Login</Button>
       </div>
     </div>
   );
