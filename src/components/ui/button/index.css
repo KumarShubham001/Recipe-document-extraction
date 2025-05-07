@@ -49,14 +49,11 @@
     width: 100%;
   }
 
-  &.icon-buton {
+  &.icon-button {
     display: flex;
     justify-content: center;
     align-items: center;
-
-    &:not(:last-child) {
-      margin-right: 5px;
-    }
+    gap: 2px;
   }
 
   &:disabled {

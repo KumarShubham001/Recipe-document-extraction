@@ -8,6 +8,7 @@
 
 .custom-table {
   background-color: #f5f5f5;
+  width: 100%;
 }
 
 .bg-dark {
@@ -59,7 +60,7 @@ th {
 
 td {
   &.modified {
-    background: #f98b85;
+    background: #ffaaa5;
   }
 
   &.action-container {

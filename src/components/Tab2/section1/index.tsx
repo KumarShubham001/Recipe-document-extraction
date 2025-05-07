@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Button from "../../ui/button";
 import Feedback from "../../ui/feedback";
 import StarRating from "../../ui/starRating";
 import Table from "../../ui/table";
 import { saveValidatedOutputs } from "./../../../api";
-import { useDocument } from './../../../context/DocumentContext';
 
 import styles from "./style.module.css";
 
@@ -22,8 +20,6 @@ interface TableData {
 }
 
 const First = ({ selectedTable, selectedDocument, extractedOutputs }) => {
-  const navigate = useNavigate();
-  const { setDocumentId } = useDocument();
   const [extractedTableData, setExtractedTableData] = useState<TableData | undefined>(undefined);
   const [initialTableData, setInitialTableData] = useState<TableData | undefined>(undefined);
   const [rating, setRating] = useState<number>(0);
@@ -82,9 +78,6 @@ const First = ({ selectedTable, selectedDocument, extractedOutputs }) => {
     console.log(data);
     // const response = await saveValidatedOutputs(data);
     // console.log("response", response);
-
-    setDocumentId(selectedDocument);
-    navigate("/app/output");
   };
 
   const revertToOriginal = () => {
@@ -100,7 +93,7 @@ const First = ({ selectedTable, selectedDocument, extractedOutputs }) => {
   const handleAddRow = () => {
     setExtractedTableData((prevTableData) => {
       if (prevTableData) {
-        const newEmptyRow = {};
+        const newEmptyRow = { modified: true };
         prevTableData.columns.forEach((col) => newEmptyRow[col.key] = "");
 
         return {
@@ -153,13 +146,13 @@ const First = ({ selectedTable, selectedDocument, extractedOutputs }) => {
         {(!extractedOutputs || !extractedTableData) && <p className="text-center">No extracted outputs found. Please select different table for the selected document.</p>}
       </div>
 
-      <Button
+      {extractedTableData && <Button
         onClick={digitizeRecipe}
         className="primary float-right"
         disabled={!extractedOutputs}
       >
-        {countChangesMadeInTableData === 0 ? 'Digitize Recipe?' : countChangesMadeInTableData + ' Changes made, Digitize Recipe?'}
-      </Button>
+        {countChangesMadeInTableData === 0 ? 'Digitize Recipe?' : countChangesMadeInTableData + ' ' + (countChangesMadeInTableData > 1 ? 'Changes' : 'Change') + ' made, Digitize Recipe?'}
+      </Button>}
     </section>
   );
 };

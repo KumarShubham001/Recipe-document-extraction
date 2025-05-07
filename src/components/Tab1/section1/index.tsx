@@ -195,7 +195,7 @@ const Status = () => {
               disabled={!!selectedFile || previousUploadsTable.length === 0}
             />
           </div>
-          <p className={styles.previousUploadTitle}>Previous Uploads:</p>
+          <p className={styles.sectionTitle}>Previous Uploads:</p>
           {previousUploadsTable.length > 0 && <Table data={previousUploadsTable} columns={tableColumns} />}
           {previousUploadsTable.length === 0 && <p>No previous uploads found!</p>}
         </div>

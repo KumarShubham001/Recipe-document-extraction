@@ -51,10 +51,10 @@ const Status = ({ selectedDoc }) => {
         Extracted Outputs (After validation)
       </h4>
 
-      <div className={styles['table-container']}>
+      <div>
         {validatedTables.length > 0 && validatedTables.map((table, index) => (
           <div className='' key={index}>
-            <p className={styles.previousUploadTitle}>
+            <p className={styles.sectionTitle}>
               <b>{table.table_name} :</b>
             </p>
             <div>

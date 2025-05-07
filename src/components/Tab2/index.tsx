@@ -20,7 +20,7 @@ interface ExtractedOutput {
 }
 
 const Tab2: React.FC = () => {
-  const { documentId, setIsLoading } = useDocument();
+  const { documentId, setDocumentId, setIsLoading } = useDocument();
   const [selectedAttribute, setSelectedAttribute] = useState<string>("")
   const [extractedOutputs, setExtractedOutputs] = useState<ExtractedOutput | undefined>(undefined)
   const [tableOptions, setTableOptions] = useState<Option[]>([]);
@@ -28,9 +28,6 @@ const Tab2: React.FC = () => {
     string | undefined
   >(undefined);
   const [documentOptions, setDocumentOptions] = useState<Option[]>([]);
-  const [selectedDocument, setSelectedDocument] = useState<
-    string | undefined
-  >(undefined);
 
   useEffect(() => {
     const _init = async () => {
@@ -75,21 +72,15 @@ const Tab2: React.FC = () => {
 
   useEffect(() => {
     if (documentId) {
-      setSelectedDocument(documentId)
+      fetchExtractedTables(documentId);
     }
-  }, [documentId])
+  }, [documentId]);
 
   useEffect(() => {
-    if (selectedDocument) {
-      fetchExtractedTables(selectedDocument);
+    if (documentId && selectedTable) {
+      fetchExtractedOutputs(documentId, selectedTable)
     }
-  }, [selectedDocument]);
-
-  useEffect(() => {
-    if (selectedDocument && selectedTable) {
-      fetchExtractedOutputs(selectedDocument, selectedTable)
-    }
-  }, [selectedDocument, selectedTable])
+  }, [documentId, selectedTable])
 
   return (
     <>
@@ -98,9 +89,8 @@ const Tab2: React.FC = () => {
           Selected document:{" "}
           <Select
             options={documentOptions}
-            onChange={(e: string) => setSelectedDocument(e)}
-            value={selectedDocument}
-          // disabled={true}
+            onChange={(e: string) => setDocumentId(e)}
+            value={documentId || undefined}
           />
         </div>
         <div className="form-element">
@@ -116,19 +106,19 @@ const Tab2: React.FC = () => {
       <div className="tab-container">
         <First
           selectedTable={selectedTable}
-          selectedDocument={selectedDocument}
+          selectedDocument={documentId}
           extractedOutputs={extractedOutputs}
         />
       </div>
       <div className="tab-container">
         <Second
           selectedTable={selectedTable}
-          selectedDocument={selectedDocument}
+          selectedDocument={documentId}
           selectedAttribute={selectedAttribute}
           extractedOutputs={extractedOutputs}
           onAttriChange={setSelectedAttribute}
         />
-        <Third selectedDocument={selectedDocument} selectedAttribute={selectedAttribute} />
+        <Third selectedDocument={documentId} selectedAttribute={selectedAttribute} />
       </div>
     </>
   );
