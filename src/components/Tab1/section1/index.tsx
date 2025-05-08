@@ -77,8 +77,8 @@ const Status = () => {
       return {
         value: item.document_id,
         label:
-          item.document_name.charAt(0).toUpperCase() +
-          item.document_name.slice(1),
+          item.document_id.charAt(0).toUpperCase() +
+          item.document_id.slice(1),
       };
     });
     setPreviousUploadList(docIds);
@@ -195,14 +195,14 @@ const Status = () => {
               disabled={!!selectedFile || previousUploadsTable.length === 0}
             />
           </div>
-          <p className={styles.previousUploadTitle}>Previous Uploads:</p>
+          <p className={styles.sectionTitle}>Previous Uploads:</p>
           {previousUploadsTable.length > 0 && <Table data={previousUploadsTable} columns={tableColumns} />}
           {previousUploadsTable.length === 0 && <p>No previous uploads found!</p>}
         </div>
         <Button
           disabled={!selectedFile && !selectedFileIdFromPrevList}
           type="button"
-          className="full-width"
+          className="full-width primary"
           onClick={submitClickHandler}
         >
           Submit

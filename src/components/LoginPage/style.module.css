@@ -14,11 +14,7 @@
 }
 
 .loginCard {
-  width: 300px;
-  border-radius: 3px;
-  box-shadow: 4px 8px 8px 0px rgba(0, 0, 0, 0.1);
-  padding: 15px;
-  border: 1px solid #c1bfb7;
+  min-width: 300px;
 }
 
 .loginForm {

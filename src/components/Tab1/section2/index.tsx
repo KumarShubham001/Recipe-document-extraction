@@ -49,19 +49,24 @@ const Second: React.FC = () => {
       }
 
       progessInterval.current = setInterval(() => {
-        getExtractionStatus(documentId).then((res) => {
-          const progressPer = Number(res.status.progress.replace('%', ''));
-          setProgress(progressPer);
+        // getExtractionStatus(documentId).then((res) => {
+        //   const progressPer = Number(res.status.progress.replace('%', ''));
+        //   setProgress(progressPer);
+        // })
 
-          if (progressPer >= 100) {
-            clearInterval(progessInterval.current);
-            setStartExtractionProcess(false);
-            fetchExtractionLog(documentId);
-          }
-        })
-      }, 3000);
+        // remove this code when we un-comment the above code
+        setProgress(prevProgress => prevProgress + 10);
+      }, 500);
     }
   }, [documentId, startExtractionProcess]);
+
+  useEffect(() => {
+    if (progress >= 100) {
+      clearInterval(progessInterval.current);
+      setStartExtractionProcess(false);
+      fetchExtractionLog(documentId);
+    }
+  }, [progress]);
 
   const startExtraction = () => {
     setStartExtractionProcess(true);
@@ -129,7 +134,7 @@ const Second: React.FC = () => {
             Please wait while we extract the data from the document.
           </p>}
         </div>
-        <Button disabled={!showExtractionLog} onClick={navigateToTab2} className="full-width">Continue to validation</Button>
+        {!startExtractionProcess && showExtractionLog && <Button disabled={!showExtractionLog} onClick={navigateToTab2} className="full-width primary">Continue to validation</Button> }
       </div>}
 
       {showIntro && <p>

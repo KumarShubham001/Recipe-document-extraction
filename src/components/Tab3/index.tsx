@@ -13,9 +13,8 @@ interface Option {
 }
 
 const Tab3: React.FC = () => {
-  const { documentId, setIsLoading } = useDocument();
+  const { documentId, setDocumentId, setIsLoading } = useDocument();
   const [previousUploadsOptions, setPreviousUploadsOptions] = useState<Option[]>([]);
-  const [selectedDoc, setSelectedDoc] = useState<string>("");
 
   const updatepreviousuploadlist = (docList) => {
     // extract the list of document IDs from the table list
@@ -23,18 +22,12 @@ const Tab3: React.FC = () => {
       return {
         value: item.document_id,
         label:
-          item.document_name.charAt(0).toUpperCase() +
-          item.document_name.slice(1),
+          item.document_id.charAt(0).toUpperCase() +
+          item.document_id.slice(1),
       };
     });
     setPreviousUploadsOptions(docIds);
   };
-
-  useEffect(() => {
-    if (documentId) {
-      setSelectedDoc(documentId);
-    }
-  }, [documentId]);
 
   useEffect(() => {
     const _init = async () => {
@@ -51,8 +44,8 @@ const Tab3: React.FC = () => {
     try {
       setIsLoading(true);
       const data = {
-        "document_id": selectedDoc,
-        
+        "document_id": documentId,
+
       }
       const res = await downloadValidatedOutputTables(data);
       console.log(res);
@@ -71,16 +64,19 @@ const Tab3: React.FC = () => {
         <div className='form-element'>
           Selected document: <Select
             options={previousUploadsOptions}
-            onChange={(e) => { setSelectedDoc(e) }}
-            value={selectedDoc}
+            onChange={(e) => { setDocumentId(e) }}
+            value={documentId || undefined}
           />
         </div>
         <div className='form-element'>
-          <Button disabled={!selectedDoc} onClick={downloadValidatedTables}>Download Tables</Button>
+          <Button disabled={!documentId} onClick={downloadValidatedTables} className="full-width primary icon-button">
+            <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="16px" width="16px" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path></svg>
+            Download Tables
+          </Button>
         </div>
       </div>
       <div className='tab-container'>
-        <First selectedDoc={selectedDoc} />
+        <First selectedDoc={documentId} />
       </div>
     </>
   );

@@ -72,8 +72,8 @@ const Third = ({ selectedDocument, selectedAttribute }) => {
         </div>
       </div>
       <div className={styles.buttonContainerFlex}>
-        <Button onClick={resetprompt}>Go back to initial prompt</Button>
-        <Button onClick={regenerateOutput} className="full-width">Re-generate output based on updated prompt</Button>
+        <Button onClick={resetprompt} className="secondry">Go back to initial prompt</Button>
+        <Button onClick={regenerateOutput} className="full-width primary">Re-generate output based on updated prompt</Button>
       </div>
       </>}
       {!currPrompt && <p>Select an attribute to view the prompt details</p>}

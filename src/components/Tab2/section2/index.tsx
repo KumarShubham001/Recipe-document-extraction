@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchWithBaseUrl, getAttributeSourcePage, getExtractedOutputs } from '../../../api';
+import { getAttributeSourcePage } from '../../../api';
 
 import Select from '../../ui/select';
 import styles from './style.module.css';
@@ -10,7 +10,7 @@ interface Option {
   label: string;
 }
 
-const Second = ({ selectedDocument, selectedTable, selectedAttribute, onAttriChange }) => {
+const Second = ({ selectedDocument, selectedTable, extractedOutputs, selectedAttribute, onAttriChange }) => {
   const { setIsLoading } = useDocument();
   const [attriOptions, setAttriOptions] = useState<Option[]>([])
   const [pageDetails, setPageDetails] = useState<any>()
@@ -36,22 +36,14 @@ const Second = ({ selectedDocument, selectedTable, selectedAttribute, onAttriCha
   }, [selectedAttribute]);
 
   useEffect(() => {
-    async function fetchData() {
-      const { outputs } = await getExtractedOutputs(selectedDocument, selectedTable);
-      console.log(outputs)
-      const attriOptions = outputs.map(output => ({
-        value: output.attribute,
-        label: output.attribute
+    if (extractedOutputs) {
+      const attriOptions = extractedOutputs?.columns.map(output => ({
+        value: output,
+        label: output
       }))
       setAttriOptions(attriOptions);
-      setIsLoading(false);
     }
-
-    if (selectedDocument && selectedTable) {
-      setIsLoading(true)
-      fetchData();
-    }
-  }, [selectedDocument, selectedTable]);
+  }, [extractedOutputs]);
 
   return (
     <section className={styles.main}>

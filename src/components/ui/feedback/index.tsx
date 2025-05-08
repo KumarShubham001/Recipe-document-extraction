@@ -16,12 +16,12 @@ const FeedbackPopup: React.FC<FeedbackPopupProps> = ({ title, placeholder, isOpe
 
     return (
         <div className={styles.popupOverlay}>
-            <div className={styles.popupContent}>
+            <div className={`${styles.popupContent} card`}>
                 <h3>{title}</h3>
                 <textarea ref={feedbackref} className={styles.feedbackTextarea} placeholder={placeholder} />
                 <div className={styles.popupButtons}>
-                    <Button onClick={onClose}>Cancel</Button>
-                    <Button onClick={() => onSave(feedbackref?.current?.value)}>Save</Button>
+                    <Button className="secondry" onClick={onClose}>Cancel</Button>
+                    <Button className="primary" onClick={() => onSave(feedbackref?.current?.value)}>Save</Button>
                 </div>
             </div>
         </div>
